@@ -1,0 +1,4 @@
+Reduce customer fields on billing page. 
+Add state to customer field.
+Implement GST.
+Add static details to customer page
