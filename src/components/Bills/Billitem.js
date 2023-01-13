@@ -6,10 +6,10 @@ import BillContext from "../../context/bills/BillContext"
 export default function Billitem(props) {
   const context = useContext(BillContext);
 
-  const { bill, updateBill, removebill } = props;
+  const { bill, updateBill, removebill} = props;
 
-  const {deleteBill} = context;
-  let initialcust = { name: "", gst: "", address: "", phno: "", email: "" };
+  const {deleteBill, getCustomers, customers } = context;
+  let initialcust = { name: "", gst: "", address: "", phno: "", email: "", state:"", pin:"", entity:""};
 
   const [products, setProducts] = useState([]);
 
@@ -17,16 +17,28 @@ export default function Billitem(props) {
 
   const [timeDate] = useState(bill.time);
 
+  useEffect(() => {
+    getCustomers();
+    //eslint-disable-next-line
+  }, []);
+
   //Total number of items present in the bill
   let total_count = 0;
 
+  // useEffect(() => {
+  //   const value = customers.find(obj => {return obj.name===bill.customer})
+  //   console.log(value);
+  //   if(value!== undefined)
+  //   {setCustomer(value);}
+  //   // eslint-disable-next-line
+  // }, []);
+  
   const Date = timeDate?.split("T")?.[0];
   const GetDate = moment(Date).format("DD-MM-YYYY");
-  const Time = timeDate?.split("T")?.[1]?.split(".")?.[0];
+  // const Time = timeDate?.split("T")?.[1]?.split(".")?.[0];
 
   useEffect(() => {
     setProducts(bill.products);
-    if (bill.customer != null) setCustomer(bill.customer);
   }, [bill]);
 
   const handleClick = (e)=>{
@@ -61,16 +73,18 @@ export default function Billitem(props) {
           </span>
           <div className="card-text">
             <div className="row">
-              {customer.phno !== undefined ? (
+              {/* {customer.name !== undefined ? (
                 <div className="col my-2">
                   <span className="mx-3">
                     Customer Name: {customer.name}
                     <br />
                   </span>
-                  <span className="mx-3">
-                    Number: {customer.phno}
-                    <br />
-                  </span>
+                  {customer.phno !== undefined ? (
+                    <span className="mx-3">
+                      Mobile: {customer.phno}
+                      <br />
+                    </span>
+                  ) : null}
                   {customer.email !== undefined ? (
                     <span className="mx-3">
                       Email ID: {customer.email}
@@ -83,20 +97,89 @@ export default function Billitem(props) {
                       <br />
                     </span>
                   ) : null}
-                  {customer.gst !== "0" ? (
+                  {customer.gst !== undefined ? (
                     <span className="mx-3">
                       GST ID: {customer.gst}
                       <br />
                     </span>
                   ) : null}
+                  {customer.state !== undefined ? (
+                    <span className="mx-3">
+                      State: {customer.state}
+                      <br />
+                    </span>
+                  ) : null}
+                  {customer.pin !== undefined ? (
+                    <span className="mx-3">
+                      PIN: {customer.pin}
+                      <br />
+                    </span>
+                  ) : null}
+                  {customer.entity !== undefined ? (
+                    <span className="mx-3">
+                      Customer/Company: {customer.entity}
+                      <br />
+                    </span>
+                  ) : null}
 
                 </div>
-              ) : null}
-              <div className="col my-2">
+              ) : null} */}
+              {customers.map((customer)=>{
+                return (customer._id===bill.customer)?(<div className="col my-2">
                 <span className="mx-3">
-                  Time: {Time}
+                  Customer Name: {customer.name}
                   <br />
                 </span>
+                {customer.phno !== undefined ? (
+                  <span className="mx-3">
+                    Mobile: {customer.phno}
+                    <br />
+                  </span>
+                ) : null}
+                {customer.email !== undefined ? (
+                  <span className="mx-3">
+                    Email ID: {customer.email}
+                    <br />
+                  </span>
+                ) : null}
+                {customer.address !== undefined ? (
+                  <span className="mx-3">
+                    Address: {customer.address}
+                    <br />
+                  </span>
+                ) : null}
+                {customer.gst !== undefined ? (
+                  <span className="mx-3">
+                    GST ID: {customer.gst}
+                    <br />
+                  </span>
+                ) : null}
+                {customer.state !== undefined ? (
+                  <span className="mx-3">
+                    State: {customer.state}
+                    <br />
+                  </span>
+                ) : null}
+                {customer.pin !== undefined ? (
+                  <span className="mx-3">
+                    PIN: {customer.pin}
+                    <br />
+                  </span>
+                ) : null}
+                {customer.entity !== undefined ? (
+                  <span className="mx-3">
+                    Entity: {customer.entity}
+                    <br />
+                  </span>
+                ) : null}
+
+              </div>):null;
+              })}
+              <div className="col my-2">
+                {/* <span className="mx-3">
+                  Time: {Time}
+                  <br />
+                </span> */}
                 <span className="mx-3">
                   Date of Creation: {GetDate}
                   <br />
@@ -142,15 +225,23 @@ export default function Billitem(props) {
             </div>
 
             <span className="d-flex justify-content-between mx-3">
-              <strong>Total Quantity: {total_count}</strong>
-              <strong>Total Amount: ₹{bill.amount}</strong>
+              <strong>Total Quantity : {total_count}</strong>
+              <strong>Total Amount : ₹{bill.amount}</strong>
             </span>
             <div className="mx-3">
               {bill.discount !== 0 && (<span className="d-flex justify-content-end">Discount Applied: {bill.discount}%</span>)}
-              {bill.gst !== 0 ? <span className="d-flex justify-content-end">GST Applied: {bill.gst}%</span> : null}
+             
               <br />
               <span className="d-flex justify-content-end">
-                <strong>Total: ₹{bill.total}</strong>
+                <strong>Total : ₹{bill.total}</strong>
+              </span>
+              <span>
+                {/* {customer.state!=="Haryana" & customer.entity==="Company"? <span className="d-flex justify-content-end">
+                <strong>IGST : ₹{bill.gstamount}</strong></span>:  */}
+                <><span className="d-flex justify-content-end">
+                <strong>CGST : ₹{bill.gstamount/2}</strong></span>
+                <span className="d-flex justify-content-end">
+                <strong>SGST : ₹{bill.gstamount/2}</strong></span></>
               </span>
               <div data-html2canvas-ignore="true">
                 <PdfDownloader

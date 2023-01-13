@@ -10,7 +10,7 @@ const { body, validationResult } = require("express-validator");
 
 router.get("/view", async (req, res) => {
   try {
-    const products = await Product.find();
+    const products = await Product.find({deleted:false});
     res.json(products);
   } catch (error) {
     console.error(error.message);
@@ -23,11 +23,8 @@ router.get("/view", async (req, res) => {
 router.post(
   "/add",
   [
-    body("sku", "Enter a valid sku").isLength({ min: 3 }),
-    body("barcode", "Enter a valid barcode").isLength({ min: 3 }),
     body("pname", "Enter a valid product name").isLength({ min: 3 }),
-    body("shortname", "Enter a valid short name").isLength({ min: 3 }),
-    body("price", "Enter a valid price").isFloat({ min: 0 }),
+    body("price", "Enter a valid price").isFloat({ min: 0 })
   ],
   async (req, res) => {
     try {
@@ -77,6 +74,7 @@ router.post(
         price: req.body.price,
         pname: req.body.pname,
         shortname: req.body.shortname,
+        gstrate: req.body.gstrate
       });
 
       const savedproduct = await product.save();
@@ -159,6 +157,8 @@ router.put("/edit/:id", async (req, res) => {
       newprod.shortname = req.body.shortname;
     }
 
+    newprod.gstrate=req.body.gstrate;
+
     let found = await Product.findById(req.params.id);
     if (!found) {
       return res.status(404).send("Not Found");
@@ -177,23 +177,40 @@ router.put("/edit/:id", async (req, res) => {
 });
 
 // ROUTE4: delete category from : DELETE "/api/product/delete"
-router.delete("/delete/:id", async (req, res) => {
-  try {
-    try {
-      let found = await Product.findById(req.params.id);
-      if (!found) {
-        return res.status(404).send("Not Found");
-      }
-    } catch (error) {
-      return res.status(400).json({ error: "Wrong id" });
-    }
+// router.delete("/delete/:id", async (req, res) => {
+//   try {
+//     try {
+//       let found = await Product.findById(req.params.id);
+//       if (!found) {
+//         return res.status(404).send("Not Found");
+//       }
+//     } catch (error) {
+//       return res.status(400).json({ error: "Wrong id" });
+//     }
 
-    let found = await Product.findByIdAndDelete(req.params.id);
-    res.json({ Success: "Product has been deleted", product: found });
+//     let found = await Product.findByIdAndDelete(req.params.id);
+//     res.json({ Success: "Product has been deleted", product: found });
+//   } catch (error) {
+//     console.error(error.message);
+//     res.status(500).send("Internal Server Error");
+//   }
+// });
+router.put("/delete/:id", async (req, res)=>{
+  try{
+    try{
+      let found = await Product.findById(ObjectId(req.params.id));
+      if(!found){
+        return req.status(404).send("Not Found");
+      }
+    } catch(error){
+      return res.status(400).json({error : "Wrong ID"});
+    }
+    let found = await Product.findByIdAndUpdate(req.params.id, {$set: {deleted:true}},{new:true});
+    res.json({found});
   } catch (error) {
     console.error(error.message);
     res.status(500).send("Internal Server Error");
   }
-});
+})
 
 module.exports = router;

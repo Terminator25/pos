@@ -21,6 +21,7 @@ export default function Productlist(props) {
     eprice: "",
     epname: "",
     eshortname: "",
+    egstrate: ""
   });
 
   const updateProduct = (prod) => {
@@ -33,6 +34,7 @@ export default function Productlist(props) {
       eprice: prod.price,
       epname: prod.pname,
       eshortname: prod.shortname,
+      egstrate: prod.gstrate
     });
   };
 
@@ -77,7 +79,8 @@ export default function Productlist(props) {
             product.ebarcode,
             product.eprice,
             product.epname,
-            product.eshortname);
+            product.eshortname,
+            product.egstrate);
 
             props.showAlert("Product Updated!", "success");
 
@@ -211,6 +214,22 @@ export default function Productlist(props) {
                     id="eprice"
                     name="eprice"
                     value={product.eprice}
+                    onChange={onChange}
+                    minLength={3}
+                    required
+                  />
+                </div>
+
+                <div className="mb-3">
+                  <label htmlFor="gstrate" className="form-label">
+                  GST Percent
+                  </label>
+                  <input
+                    type="number"
+                    className="form-control"
+                    id="egstrate"
+                    name="egstrate"
+                    value={product.egstrate}
                     onChange={onChange}
                     minLength={3}
                     required

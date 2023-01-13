@@ -9,13 +9,11 @@ const productSchema = new Schema({
     },
 
     sku:{
-        type : String,
-        required: true
+        type : String    
     },
 
     barcode:{
         type : String,
-        required: true
     },
 
     price:{
@@ -30,6 +28,16 @@ const productSchema = new Schema({
 
     shortname:{
         type : String
+    },
+
+    gstrate:{
+        type : Number,
+        default : 0
+    },
+    
+    deleted:{
+        type: Boolean,
+        default:false
     }
 
   });

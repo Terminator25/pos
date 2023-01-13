@@ -34,7 +34,7 @@ export default function Customeritem(props) {
     <div className="card my-3">
       <div className="card-body">
         <h5 className="card-title">{customer.name}</h5>
-        <p className="card-text">Mobile Number: {customer.phno} </p>
+        {(customer.phno!==undefined)?(<p className="card-text">Mobile Number: {customer.phno}</p>):null}
         <i className="fas fa-edit mx-2" onClick={()=>{updateCustomer(customer)}}></i>
         <i className="fa fa-trash mx-2" aria-hidden="true" onClick={handleClick}></i>
         <i className="fa fa-search mx-2" aria-hidden="true" onClick={onClick}></i>

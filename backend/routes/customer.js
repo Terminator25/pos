@@ -9,7 +9,7 @@ const { body, validationResult } = require("express-validator");
 // ROUTE1: get customer list from : GET "/api/customer/view"
 router.get("/view", async (req, res) => {
   try {
-    const customers = await Customer.find();
+    const customers = await Customer.find({deleted:false});
     res.json(customers);
   } catch (error) {
     console.error(error.message);
@@ -23,8 +23,6 @@ router.post(
   "/add",
   [
     body("name", "Enter a valid customer name").isLength({ min: 3 }),
-    body("phno", "Enter a valid mobile number")
-      .isLength({ min: 10 }),
   ],
   async (req, res) => {
 
@@ -60,16 +58,30 @@ router.post(
         newcust.email = req.body.email;
       }
 
-      newcust.phno = req.body.phno;
+      
       newcust.name = req.body.name;
 
       if (req.body.gst) {
         newcust.gst = req.body.gst;
       }
 
+      if (req.body.phno) {
+        newcust.phno = req.body.phno;
+      }
+
       if (req.body.address) {
         newcust.address = req.body.address;
       }
+
+      if(req.body.state) {
+        newcust.state=req.body.state;
+      }
+
+      if(req.body.pin) {
+        newcust.pin=req.body.pin;
+      }
+
+      newcust.entity=req.body.entity;
 
       const savedcustomer = await newcust.save();
 
@@ -86,36 +98,39 @@ router.put("/edit/:id", async (req, res) => {
   try {
     const newcust = {};
 
-    if (req.body.phno) {
-      let found = await Customer.findOne({ phno: req.body.phno });
-      if (found && !found._id.equals(req.params.id)) {
-        return res
-          .status(400)
-          .json({
-            error: "Sorry! a customer with same mobile number already exists",
-          });
-      }
-      if (req.body.phno.length < 10) {
-        return res.status(400).json({ error: "Enter a valid mobile number" });
-      }
-      newcust.phno = req.body.phno;
-    }
+    // if (req.body.phno) {
+      // let found = await Customer.findOne({ phno: req.body.phno });
+      // if (found && !found._id.equals(req.params.id)) {
+      //   return res
+      //     .status(400)
+      //     .json({
+      //       error: "Sorry! a customer with same mobile number already exists",
+      //     });
+      // }
+      if(req.body.phno!==""){newcust.phno = req.body.phno;}
+    // }
 
         if (req.body.name.length<3) {
             return res.status(400).json({ error: "Enter a valid customer name" });
         }
-      newcust.name = req.body.name;
+      if(req.body.name!==""){newcust.name = req.body.name;}
  
       newcust.gst = req.body.gst;
 
 
-      if (!validator.validate(req.body.email) && req.body.email!=="") {
-        return res.status(400).json({ error: "Invalid email id" });
-    }
+    //   if (!validator.validate(req.body.email) && req.body.email!=="") {
+    //     return res.status(400).json({ error: "Invalid email id" });
+    // }
   
-    newcust.email = req.body.email;
+      newcust.email = req.body.email;
     
-    newcust.address = req.body.address;
+      newcust.address = req.body.address;
+
+      newcust.state= req.body.state;
+
+      newcust.pin= req.body.pin;
+      
+      newcust.entity= req.body.entity;
 
     let found = await Customer.findById(req.params.id);
     if (!found) {
@@ -135,23 +150,42 @@ router.put("/edit/:id", async (req, res) => {
 });
 
 // ROUTE4: delete customer from : DELETE "/api/customer/delete"
-router.delete("/delete/:id", async (req, res) => {
-    try {
-      try {
-        let found = await Customer.findById(ObjectId(req.params.id));
-        if (!found) {
-          return res.status(404).send("Not Found");
-        }
-      } catch (error) {
-        return res.status(400).json({ error: "Wrong id" });
-      }
+// router.delete("/delete/:id", async (req, res) => {
+//     try {
+//       try {
+//         let found = await Customer.findById(ObjectId(req.params.id));
+//         if (!found) {
+//           return res.status(404).send("Not Found");
+//         }
+//       } catch (error) {
+//         return res.status(400).json({ error: "Wrong id" });
+//       }
   
-      let found = await Customer.findByIdAndDelete(req.params.id);
-      res.json({ Success: "Customer has been deleted", Customer: found });
-    } catch (error) {
-      console.error(error.message);
-      res.status(500).send("Internal Server Error");
+//       let found = await Customer.findByIdAndDelete(req.params.id);
+//       res.json({ Success: "Customer has been deleted", Customer: found });
+//     } catch (error) {
+//       console.error(error.message);
+//       res.status(500).send("Internal Server Error");
+//     }
+//   });
+
+router.put("/delete/:id", async (req, res)=>{
+  try{
+    try{
+      let found = await Customer.findById(ObjectId(req.params.id));
+      if(!found){
+        return req.status(404).send("Not Found");
+      }
+    } catch(error){
+      return res.status(400).json({error : "Wrong ID"});
     }
-  });
+    let found = await Customer.findByIdAndUpdate(req.params.id, {$set: {deleted:true}},{new:true});
+    res.json({found});
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send("Internal Server Error");
+  }
+})
+
 
 module.exports = router;

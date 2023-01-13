@@ -12,6 +12,9 @@ export default function Addcustomer(props) {
     address: "",
     phno: "",
     email: "",
+    state: "",
+    pin: "",
+    entity: "Customer"
   });
 
   useEffect(() => {
@@ -46,7 +49,10 @@ export default function Addcustomer(props) {
         customer.phno,
         customer.email,
         customer.address,
-        customer.gst
+        customer.gst,
+        customer.state,
+        customer.pin,
+        customer.entity
       );
 
       setCustomer({
@@ -55,6 +61,9 @@ export default function Addcustomer(props) {
         address: "",
         phno: "",
         email: "",
+        state: "",
+        pin: "",
+        entity: "Customer"
       });
 
       props.showAlert("Customer Added!", "success");
@@ -146,11 +155,53 @@ export default function Addcustomer(props) {
                   value={customer.address}
                 />
               </div>
-
+              <div className="row">
+              <div className="col-sm mb-2">
+                <label htmlFor="state" className="form-label">
+                  State
+                </label>
+                <input
+                  type="text"
+                  className="form-control"
+                  id="state"
+                  name="state"
+                  onChange={onChange}
+                  value={customer.state}
+                />
+              </div>
+              <div className="col-sm mb-2">
+                <label htmlFor="pin" className="form-label">
+                  PIN
+                </label>
+                <input
+                  type="text"
+                  className="form-control"
+                  id="pin"
+                  name="pin"
+                  onChange={onChange}
+                  value={customer.pin}
+                />
+              </div>
+              <div className="col-sm mb-2">
+                <label htmlFor="entity" className="form-label">
+                  Classification (Customer/Company)
+                </label>
+                <select
+                  id="entity"
+                  name="entity"
+                  className="form-select"
+                  aria-label="Classification"
+                  onChange={onChange}
+                  value={customer.entity}
+                >
+                  <option key="1">Customer</option>
+                  <option key="2">Company</option>
+                </select>  
+              </div>
+              </div>
               <button
                 disabled={
                   customer.name.length < 3 ||
-                  customer.phno.length < 10 ||
                   !(validator.validate(customer.email) || customer.email === "")
                 }
                 type="submit"

@@ -3,13 +3,14 @@ const Bill = require("../models/bill");
 const Customer = require("../models/bill");
 const router = express.Router();
 const { ObjectId } = require("mongodb");
+const bill = require("../models/bill");
 
 
 // ROUTE1: get bills list from : GET "/api/bill/view"
 
 router.get("/view", async (req, res) => {
   try {
-    const bills = await Bill.find();
+    const bills = await Bill.find({deleted:false});
     res.json(bills);
   } catch (error) {
     console.error(error.message);
@@ -28,37 +29,59 @@ router.post("/add", async (req, res) => {
     bill.paymentmode = req.body.paymentmode;
     bill.discount = req.body.discount;
     bill.amount = req.body.amount;
-    bill.gst = req.body.gst;
+    bill.gstamount = req.body.gstamount;
     let currentTime = new Date();
     let ISToffSet = 330; //IST is 5:30; i.e. 60*5+30 = 330 in minutes 
     let offset= ISToffSet*60*1000;
     // var ISTTime = new Date(date.getTime()+offset);
     bill.time = new Date(currentTime.getTime()+offset);
 
-    bill.customer = new Customer(); 
+    bill.customer = req.body.customer; 
+  //   bill.customer = new Customer(); 
 
-   //console.log(bill)
-    if (req.body.customer.phno) {
-      bill.customer.phno = req.body.customer.phno;
-    }
+  //  //console.log(bill)
+  //   if (req.body.customer.phno) {
+  //     bill.customer.phno = req.body.customer.phno;
+  //   }
   
-    if (req.body.customer.name) {
-      bill.customer.name = req.body.customer.name;
-    }
+  //   if (req.body.customer.name) {
+  //     bill.customer.name = req.body.customer.name;
+  //   }
 
-    if (req.body.customer.gst) {
-      bill.customer.gst = req.body.customer.gst;
-    }
+  //   if (req.body.customer.gst) {
+  //     bill.customer.gst = req.body.customer.gst;
+  //   }
 
-    if (req.body.customer.address) {
-      bill.customer.address = req.body.customer.address;
-    }
+  //   if (req.body.customer.address) {
+  //     bill.customer.address = req.body.customer.address;
+  //   }
 
-    if (req.body.customer.email) {
-      bill.customer.email = req.body.customer.email;
-    }
+  //   if (req.body.customer.email) {
+  //     bill.customer.email = req.body.customer.email;
+  //   }
+
+  //   if (req.body.customer.email) {
+  //     bill.customer.email = req.body.customer.email;
+  //   }
+
+  //   if (req.body.customer.email) {
+  //     bill.customer.email = req.body.customer.email;
+  //   }
+
+  //   if (req.body.customer.pin) {
+  //     bill.customer.pin = req.body.customer.pin;
+  //   }
+
+  //   if (req.body.customer.state) {
+  //     bill.customer.state = req.body.customer.state;
+  //   }
+
+  //   if (req.body.customer.entity) {
+  //     bill.customer.entity = req.body.customer.entity;
+  //   }
 
     bill.products = req.body.products;
+    
 
     const savedbill = await bill.save();
 
@@ -142,37 +165,21 @@ router.post("/find", async(req, res)=>{
 router.put("/edit/:id", async (req, res) => {
   try{
     const billupdate = {
-      customer:{},
+      customer:"",
       total: "",
       discount: 0,
       amount: "",
-      gst: 0,
+      gstamount: 0,
       products: []
     };
-    if (req.body.customer.phno) {
-      billupdate.customer.phno = req.body.customer.phno;
-    }
   
-    if (req.body.customer.name) {
-      billupdate.customer.name = req.body.customer.name;
-    }
-
-    if (req.body.customer.gst) {
-      billupdate.customer.gst = req.body.customer.gst;
-    }
-
-    if (req.body.customer.address) {
-      billupdate.customer.address = req.body.customer.address;
-    }
-
-    if (req.body.customer.email) {
-      billupdate.customer.email = req.body.customer.email;
-    }
+    billupdate.customer = req.body.customer;
     billupdate.total = req.body.total;
     billupdate.discount = req.body.discount;
     billupdate.amount = req.body.amount;
-    billupdate.gst = req.body.gst;
+    billupdate.gstamount = req.body.gstamount;
     billupdate.products = req.body.products;
+    
     found = await Bill.findById(req.params.id);
     if (!found){
       return res.status(404).send("No Bill Found");
@@ -188,23 +195,42 @@ router.put("/edit/:id", async (req, res) => {
 })
 
 // ROUTE4: delete customer from : DELETE "/api/bill/delete/id"
-router.delete("/delete/:id", async (req, res) => {
-  try {
-    try {
-      let found = await Bill.findById(ObjectId(req.params.id));
-      if (!found) {
-        return res.status(404).send("Not Found");
-      }
-    } catch (error) {
-      return res.status(400).json({ error: "Wrong id" });
-    }
+// router.delete("/delete/:id", async (req, res) => {
+//   try {
+//     try {
+//       let found = await Bill.findById(ObjectId(req.params.id));
+//       if (!found) {
+//         return res.status(404).send("Not Found");
+//       }
+//     } catch (error) {
+//       return res.status(400).json({ error: "Wrong id" });
+//     }
 
-    let found = await Bill.findByIdAndDelete(req.params.id);
-    res.json({ Success: "Customer has been deleted", Customer: found });
+//     let found = await Bill.findByIdAndDelete(req.params.id);
+//     res.json({ Success: "Customer has been deleted", Customer: found });
+//   } catch (error) {
+//     console.error(error.message);
+//     res.status(500).send("Internal Server Error");
+//   }
+// });
+
+// ROUTE4: edit bill deleted field to hide value
+router.put("/delete/:id", async (req, res)=>{
+  try{
+    try{
+      let found = await Bill.findById(ObjectId(req.params.id));
+      if(!found){
+        return req.status(404).send("Not Found");
+      }
+    } catch(error){
+      return res.status(400).json({error : "Wrong ID"});
+    }
+    let found = await Bill.findByIdAndUpdate(req.params.id, {$set: {deleted:true}},{new:true});
+    res.json({found});
   } catch (error) {
     console.error(error.message);
     res.status(500).send("Internal Server Error");
   }
-});
+})
 
 module.exports = router;

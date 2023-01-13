@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import CustomerContext from "../../context/customers/CustomerContext";
 import Customeritem from "./Customeritem";
-var validator = require("email-validator");
+// var validator = require("email-validator");
 
 
 export default function Customerlist(props) {
@@ -20,7 +20,10 @@ export default function Customerlist(props) {
     egst: "",
     eaddress: "",
     ephno: "",
-    eemail: ""
+    eemail: "",
+    estate: "",
+    epin: "",
+    eentity: ""
   });
 
   const updateCustomer = (cust) => {
@@ -31,7 +34,10 @@ export default function Customerlist(props) {
       egst: cust.gst,
       eaddress: cust.address,
       ephno: cust.phno,
-      eemail: cust.email
+      eemail: cust.email,
+      estate: cust.state,
+      epin: cust.pin,
+      eentity: cust.entity
     });
   };
 
@@ -44,33 +50,53 @@ export default function Customerlist(props) {
 
   const handleClick = (e) => {
     e.preventDefault();
-    let present = false;
-    let mess = "";
+    // let present = false;
+    // let mess = "";
 
-    for (let index = 0; index < customers.length; index++) {
-      const element = customers[index];
-      if ((element.phno === customer.phno ) && (element._id !== customer.id )) {
-        present = true;
-        mess = "Customer with same mobile number already exists";
-        break;
-      }
-    }
+    // for (let index = 0; index < customers.length; index++) {
+    //   const element = customers[index];
+    //   if ((element.phno === customer.phno ) && (element._id !== customer.id )) {
+    //     present = true;
+    //     mess = "Customer with same mobile number already exists";
+    //     break;
+    //   }
+    // }
 
-    if (present) {
-        props.showAlert(mess, "danger");
-      } else {
+    // if (present) {
+    //     props.showAlert(mess, "danger");
+    //   } else {
+      // if(customer.ename===""){customer.ename=null};
+      // if(customer.ephno===""){customer.ephno=null};
+      // if(customer.eaddress===""){customer.eaddress=null};
+      // if(customer.egst===""){customer.egst=null};
+      // if(customer.eemail===""){customer.eemail=null};
+      // if(customer.estate===""){customer.estate=null};
+      // if(customer.epin===""){customer.epin=null};
+      // if(customer.eentity===""){customer.eentity=null};
 
         editCustomer(customer.id,
           customer.ename,
           customer.ephno,
           customer.eemail,
           customer.eaddress,
-          customer.egst,);
+          customer.egst,
+          customer.estate,
+          customer.epin,
+          customer.eentity
+          );
 
             props.showAlert("Customer Updated!", "success");
 
-      }
-
+      // }
+      setCustomer({id: "",
+      ename: "",
+      egst: "",
+      eaddress: "",
+      ephno: "",
+      eemail: "",
+      estate: "",
+      epin: "",
+      eentity: ""})
       refClose.current.click();
 
   };
@@ -139,14 +165,12 @@ export default function Customerlist(props) {
                   Mobile Number
                   </label>
                   <input
-                    type="number"
+                    type="text"
                     className="form-control"
                     id="ephno"
                     name="ephno"
                     value={customer.ephno}
                     onChange={onChange}
-                    minLength={3}
-                    required
                   />
                 </div>
 
@@ -192,6 +216,48 @@ export default function Customerlist(props) {
                   />
                 </div>
 
+                <div className="mb-3">
+                  <label htmlFor="estate" className="form-label">
+                  State
+                  </label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="estate"
+                    name="estate"
+                    value={customer.estate}
+                    onChange={onChange}
+                  />
+                </div>
+
+                <div className="mb-3">
+                  <label htmlFor="epin" className="form-label">
+                  PIN
+                  </label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="epin"
+                    name="epin"
+                    value={customer.epin}
+                    onChange={onChange}
+                  />
+                </div>
+
+                <div className="mb-3">
+                  <label htmlFor="eentity" className="form-label">
+                  Customer/Company
+                  </label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="eentity"
+                    name="eentity"
+                    value={customer.eentity}
+                    onChange={onChange}
+                  />
+                </div>
+
               </form>
             </div>
             <div className="modal-footer">
@@ -204,7 +270,7 @@ export default function Customerlist(props) {
                 Close
               </button>
               <button
-                disabled={customer.ephno.length < 10 || customer.ename.length < 3 || !(validator.validate(customer.eemail) || (customer.eemail===""))}
+                disabled={customer.ename.length < 3}
                 type="button"
                 onClick={handleClick}
                 className="btn btn-primary"
@@ -219,7 +285,7 @@ export default function Customerlist(props) {
       <div className="row my-3">
         <h2>Saved Customers</h2> <br />
         <br />
-        {customers.map((customer) => {
+        {/* {customers.map((customer) => {
           return (
             <Customeritem
               key={customer._id}
@@ -228,7 +294,31 @@ export default function Customerlist(props) {
               showAlert={props.showAlert}
             />
           );
+        })} */}
+
+        {customers.filter(person=> person.entity==="Customer").map((customer) => {
+          return (
+            <Customeritem
+            key={customer._id}
+            updateCustomer={updateCustomer}
+            customer={customer}
+            showAlert={props.showAlert}
+            />
+          );
         })}
+
+      <h2>Saved Companies</h2> <br />
+      {customers.filter(person=> person.entity==="Company").map((customer) => {
+          return (
+            <Customeritem
+              key={customer._id}
+              updateCustomer={updateCustomer}
+              customer={customer}
+              showAlert={props.showAlert}
+            />
+          );
+        })}  
+      
       </div>
     </>
   )

@@ -3,6 +3,8 @@ import BillContext from "../../context/bills/BillContext";
 import Billitem from "./Billitem";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
+import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
+import Tooltip from 'react-bootstrap/Tooltip';  
 
 export default function Billresult(props) {
     const context = useContext(BillContext);
@@ -13,7 +15,7 @@ export default function Billresult(props) {
     const [searchresults, setResults]=useState([]);
     
     //Initial values stored in item state
-    let initialitem = { pname: "", price: "", quantity: 1 };
+    let initialitem = { pname: "", price: "", quantity: 1, gstrate:""};
 
     const [item, setItem] = useState(initialitem);
     
@@ -21,10 +23,13 @@ export default function Billresult(props) {
     const [products, setProducts] = useState([]);
 
     //Create a customer state
-    const [customer, setCustomer] = useState({ name: "", gst: "", address: "", phno: "", email: "" });
+    const [customer, setCustomer] = useState({ name: "", gst: "", address: "", phno: "", email: "", state: "", pin: "", entity: "" });
 
     //State to check cost change
     const [changecost, setChange] = useState(0)
+
+    //State to calculate CGST, IGST, SGST
+    const [gsttotal, setGST] = useState(0);
     
     //State to update bill details
     const [bill, setBill] = useState({
@@ -33,7 +38,7 @@ export default function Billresult(props) {
       customer: {},
       discount: 0,
       amount: "",
-      gst: 0,
+      gstamount: 0,
       products: [],
       billnumber: ""
     });
@@ -95,9 +100,10 @@ export default function Billresult(props) {
 
     const CalculateTotal = (e) => {
       e.preventDefault();
-      let value = cost - (cost * bill.discount) / 100;
-      let final_value = value + (value * bill.gst) / 100;
+      let final_value = cost - (cost * bill.discount) / 100;
       setTotal(final_value);
+      let tax = gstvalue - (gstvalue*bill.discount) /100;
+      setGST(tax.toFixed(2));
       setChange(0);
     };
 
@@ -126,13 +132,14 @@ export default function Billresult(props) {
       setProducts(billitem.products);
       setCustomer(billitem.customer);
       setTotal(billitem.total);
+      setGST(billitem.gstamount);
       setBill({
         id:billitem._id,
       total: billitem.total,
       customer: customer,
       discount: billitem.discount,
       amount: billitem.amount,
-      gst: billitem.gst,
+      gstamount: billitem.gstamount,
       products: billitem.products,
       billnumber:billitem.billnumber
       });
@@ -152,6 +159,9 @@ export default function Billresult(props) {
       if(customer.address===""){customer.address=undefined};
       if(customer.gst===0){customer.gst=undefined};
       if(customer.email===""){customer.email=undefined};
+      if(customer.state===""){customer.state=undefined};
+      if(customer.pin===""){customer.pin=undefined};
+      if(customer.entity===""){customer.entity=undefined};
       // return;
       editBill(
         bill.id,
@@ -159,7 +169,7 @@ export default function Billresult(props) {
         (bill.customer=customer),
         bill.discount,
         (bill.amount=cost),
-        bill.gst,
+        bill.gstamount,
         (bill.products=products)
       );
       setTotal(0);
@@ -182,7 +192,7 @@ export default function Billresult(props) {
       productlist.map((product) => {
         // if (product.pname === item.pname)
         return product.pname === item.pname
-          ? setItem((prevState) => ({ ...prevState, price: product.price }))
+          ? setItem((prevState) => ({ ...prevState, price: product.price, gstrate: product.gstrate }))
           : "";
       });
     }, [item.pname, productlist]);
@@ -209,6 +219,11 @@ export default function Billresult(props) {
       }
       //eslint-disable-next-line
     }, [item]);
+    
+    let gstvalue = products.reduce((accumulator, { price, quantity, gstrate }) => {
+      return accumulator + price * quantity*(gstrate/100);
+    }, 0);
+
     return (
       <>
         <div className="container">
@@ -394,16 +409,6 @@ export default function Billresult(props) {
                     value={bill.discount}
                   />
                 </div>
-                <div className="col-sm mb-3">
-                  <label>GST (Percent)</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    name="gst"
-                    onChange={onChange}
-                    value={bill.gst}
-                  />
-                </div>
               </div>
               <div className="mb-3 d-flex justify-content-start">
                 <button
@@ -417,6 +422,17 @@ export default function Billresult(props) {
                   <strong>The Total is : </strong>
                   {total}
                 </span>
+                {customer.state!=="Haryana" & customer.entity==="Company"?
+              (<span className="mx-4">
+                <strong>IGST : </strong>
+                {gsttotal}
+                </span>):(<span className="mx-4">
+                <strong>CGST : </strong>
+                {gsttotal/2}
+                <br/>
+                <strong>SGST : </strong>
+                {gsttotal/2}
+              </span>)}
               </div>
             </form>
           </Modal.Body>
@@ -424,9 +440,13 @@ export default function Billresult(props) {
             <Button variant="secondary" ref={refClose} onClick={handleClose}>
               Close
             </Button>
-            <Button variant="primary" disabled={changecost===1} onClick={handleEdit}>
-              Save Changes
-            </Button>
+            <OverlayTrigger overlay={(changecost===1?(<Tooltip id="tooltip-disabled">Amount Changed, Recalculate Total</Tooltip>):<span></span>)}>
+                <span>
+                <Button variant="primary" disabled={changecost===1} onClick={handleEdit}>
+                  Save Changes
+                </Button>
+                </span>
+              </OverlayTrigger>  
           </Modal.Footer>
         </Modal>
       </>

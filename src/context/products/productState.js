@@ -1,5 +1,6 @@
 import ProductContext from "./ProductContext";
 import React, { useState } from "react";
+import axios from "axios";
 
 const ProductState = (props)=>{
 
@@ -49,7 +50,7 @@ const ProductState = (props)=>{
 
       // Add a product
 
-  const addProduct = async (category,sku,barcode,price,pname,shortname)=>{
+  const addProduct = async (category,sku,barcode,price,pname,shortname, gstrate)=>{
 
     const response = await fetch(`${host}/api/product/add`, {
       method: 'POST',
@@ -57,7 +58,7 @@ const ProductState = (props)=>{
         'Content-Type': 'application/json',
         'auth-token': localStorage.getItem('token')
       },
-      body: JSON.stringify({category,sku,barcode,price,pname,shortname})
+      body: JSON.stringify({category,sku,barcode,price,pname,shortname, gstrate})
     });
     const json  = await response.json();
     setProducts(products.concat(json))
@@ -65,7 +66,7 @@ const ProductState = (props)=>{
 
   
   // Edit a product
-  const editProduct = async (id,category,sku,barcode,price,pname,shortname)=>{
+  const editProduct = async (id,category,sku,barcode,price,pname,shortname, gstrate)=>{
 
     const response = await fetch(`${host}/api/product/edit/${id}`, {
       method: 'PUT',
@@ -73,7 +74,7 @@ const ProductState = (props)=>{
         'Content-Type': 'application/json',
         'auth-token': localStorage.getItem('token')
       },
-      body: JSON.stringify({id,category,sku,barcode,price,pname,shortname})
+      body: JSON.stringify({id,category,sku,barcode,price,pname,shortname, gstrate})
     });
     const json  = response.json();
     console.log(json);
@@ -90,6 +91,7 @@ const ProductState = (props)=>{
         newproduct[index].price = price;
         newproduct[index].pname = pname;
         newproduct[index].shortname = shortname;
+        newproduct[index].gstrate = gstrate;
         break;
       }
     }
@@ -100,20 +102,39 @@ const ProductState = (props)=>{
 
   // Delete a category
 
-  const deleteProduct = async (id)=>{
+  // const deleteProduct = async (id)=>{
 
-    const response = await fetch(`${host}/api/product/delete/${id}`, {
-      method: 'DELETE',
-      headers: {
+  //   const response = await fetch(`${host}/api/product/delete/${id}`, {
+  //     method: 'DELETE',
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //       'auth-token': localStorage.getItem('token')
+  //     },
+  //   });
+  //   const json  = response.json();
+  //   console.log(json);
+
+  //   let newprods = products.filter((prod)=>{return prod._id!==id})
+  //   setProducts(newprods)
+  // }
+  const deleteProduct = (id) => {
+    const option = {
+      method: 'PUT', headers: {
         'Content-Type': 'application/json',
         'auth-token': localStorage.getItem('token')
       },
-    });
-    const json  = response.json();
-    console.log(json);
-
-    let newprods = products.filter((prod)=>{return prod._id!==id})
-    setProducts(newprods)
+      url: `${host}/api/product/delete/${id}`
+    };
+    axios(option)
+    .then((e) => {
+      console.log(e,'e112');
+      if (e?.data?.found?._id) {
+        getProducts();
+      }
+    })
+    .catch((err) => {
+      console.log(err,'err');
+    })
   }
 
 

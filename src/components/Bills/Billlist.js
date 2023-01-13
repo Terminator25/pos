@@ -8,10 +8,10 @@
 
   export default function Billlist(props) {
     const context = useContext(BillContext);
-    const { bills, getBills, productlist, getProducts, editBill } = context;
+    const { bills, getBills, productlist, getProducts, editBill, getCustomers, customers } = context;
 
     //Initial values stored in item state
-    let initialitem = { pname: "", price: "", quantity: 1 };
+    let initialitem = { pname: "", price: "", quantity: 1, gstrate:"" };
 
     const [item, setItem] = useState(initialitem);
     
@@ -19,19 +19,22 @@
     const [products, setProducts] = useState([]);
 
     //Create a customer state
-    const [customer, setCustomer] = useState({ name: "", gst: "", address: "", phno: "", email: "" });
+    const [customer, setCustomer] = useState({ name: "", gst: "", address: "", phno: "", email: "", state: "", pin: "", entity: "" });
 
     //State to check cost change
     const [changecost, setChange] = useState(0)
-    
+
+    //State to calculate CGST, IGST, SGST
+    const [gsttotal, setGST] = useState(0);
+
     //State to update bill details
     const [bill, setBill] = useState({
       id: "",
       total: "",
-      customer: {},
+      customer: null,
       discount: 0,
       amount: "",
-      gst: 0,
+      gstamount: 0,
       products: [],
       billnumber: ""
     });
@@ -56,10 +59,10 @@
     };
 
     //Update customer state
-    const handleCustomer = (e) => {
-      const { name, value } = e.target;
-      setCustomer((prevState) => ({ ...prevState, [name]: value }));
-    };
+    // const handleCustomer = (e) => {
+    //   const { name, value } = e.target;
+    //   setCustomer((prevState) => ({ ...prevState, [name]: value }));
+    // };
 
     const handleProduct = (e) => {
       const { name, value } = e.target;
@@ -87,9 +90,10 @@
 
     const CalculateTotal = (e) => {
       e.preventDefault();
-      let value = cost - (cost * bill.discount) / 100;
-      let final_value = value + (value * bill.gst) / 100;
+      let final_value = cost - (cost * bill.discount) / 100;
       setTotal(final_value);
+      let tax = gstvalue - (gstvalue*bill.discount) /100;
+      setGST(tax.toFixed(2));
       setChange(0);
     };
 
@@ -116,16 +120,16 @@
 
     const updateBill= (billitem) => {
       setProducts(billitem.products);
-      setCustomer(billitem.customer);
       setTotal(billitem.total);
+      setGST(billitem.gstamount);
       // return;
       setBill({
         id:billitem._id,
       total: billitem.total,
-      customer: customer,
+      customer: billitem.customer,
       discount: billitem.discount,
       amount: billitem.amount,
-      gst: billitem.gst,
+      gstamount: billitem.gstamount,
       products: billitem.products,
       billnumber:billitem.billnumber
       });
@@ -139,19 +143,13 @@
 
     const handleEdit =(e) =>{
       e.preventDefault();
-      if(customer.name===""){customer.name=undefined};
-      if(customer.phno===""){customer.phno=undefined};
-      if(customer.address===""){customer.address=undefined};
-      if(customer.gst===0){customer.gst=undefined};
-      if(customer.email===""){customer.email=undefined};
-      // return;
       editBill(
         bill.id,
         (bill.total=total),
-        (bill.customer=customer),
+        bill.customer||null,
         bill.discount,
         (bill.amount=cost),
-        bill.gst,
+        bill.gstamount,
         (bill.products=products)
       );
       setTotal(0);
@@ -162,6 +160,7 @@
     useEffect(() => {
       getProducts();
       getBills();
+      getCustomers();
       //eslint-disable-next-line
     }, []);
 
@@ -197,6 +196,11 @@
       }
       //eslint-disable-next-line
     }, [item]);
+
+    let gstvalue = products.reduce((accumulator, { price, quantity, gstrate }) => {
+      return accumulator + price * quantity*(gstrate/100);
+    }, 0);
+
     return (
       <>
         <div className="container">
@@ -207,7 +211,8 @@
           <br />
           {bills.slice(0).reverse().map((bill) => {
             return (
-              <Billitem  updateBill={updateBill} bill={bill} key={bill._id} showAlert={props.showAlert} />
+            //  <> {bill.deleted===false?(<Billitem  updateBill={updateBill} bill={bill} key={bill._id} showAlert={props.showAlert} />):null}</>
+             <Billitem  updateBill={updateBill} bill={bill} key={bill._id} showAlert={props.showAlert} />
             );
           })}
         </div>
@@ -220,7 +225,7 @@
           </Modal.Header>
           <Modal.Body>
             <form className="my-3" onSubmit={handleSubmit}>
-                <div className="row">
+                {/* <div className="row">
                   <h4>Customer Details</h4>
                   <div className="col-sm mb-3">
                     <label>Name</label>
@@ -273,6 +278,31 @@
                       value={customer.address}
                     />
                   </div>
+                </div>
+              </div> */}
+              <div className="row">
+                <h4>Customer Details</h4>
+                <div className="cols-sm mb-3">
+                <select
+                    id="customer"
+                    name="customer"
+                    className="form-select"
+                    aria-label="Customer Name"
+                    onChange={onChange}
+                  >
+                    {/* selected={product.category === "sel" ? "selected" : ''} */}
+                    <option key="sel" value={null} selected={bill.customer === "sel" ? "selected" : null}>
+                      Customer Name
+                    </option>
+                    {customers.map((user) => {
+                      return (
+                        <option key={user._id} value={user._id}>
+                          {user.name}
+                        </option>
+                      );
+                    })}
+                    <option value="" >Remove Customer Details</option>
+                  </select>
                 </div>
               </div>
               <div className="row">
@@ -380,16 +410,6 @@
                     value={bill.discount}
                   />
                 </div>
-                <div className="col-sm mb-3">
-                  <label>GST (Percent)</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    name="gst"
-                    onChange={onChange}
-                    value={bill.gst}
-                  />
-                </div>
               </div>
               <div className="mb-3 d-flex justify-content-start">
                 <button
@@ -403,6 +423,17 @@
                   <strong>The Total is : </strong>
                   {total}
                 </span>
+                {customer.state!=="Haryana" & customer.entity==="Company"?
+              (<span className="mx-4">
+                <strong>IGST : </strong>
+                {gsttotal}
+                </span>):(<span className="mx-4">
+                <strong>CGST : </strong>
+                {gsttotal/2}
+                <br/>
+                <strong>SGST : </strong>
+                {gsttotal/2}
+              </span>)}
               </div>
             </form>
           </Modal.Body>

@@ -35,14 +35,14 @@ const BillState = (props)=>{
       }
     
       //Add a bill to database
-      const addBill = async (total, paymentmode, billnumber, customer, discount, amount, gst, products)=>{
+      const addBill = async (total, paymentmode, billnumber, customer, discount, amount, gstamount, products)=>{
 
         const response = await fetch(`${host}/api/bill/add`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({total, paymentmode, billnumber, customer, discount, amount, gst, products})
+          body: JSON.stringify({total, paymentmode, billnumber, customer, discount, amount, gstamount, products})
         });
         const json  = await response.json();
         setBills(bills.concat(json))
@@ -82,13 +82,13 @@ const BillState = (props)=>{
       }
 
       //Edit bills that have been created
-      const editBill = async (id, total, customer, discount, amount, gst, products) => {
+      const editBill = async (id, total, customer, discount, amount, gstamount, products) => {
         const response = await fetch(`${host}/api/bill/edit/${id}`,{
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({id, total, customer, discount, amount, gst, products })
+          body: JSON.stringify({id, total, customer, discount, amount, gstamount, products })
         });
         const json = response.json();
         console.log(json)
@@ -103,7 +103,7 @@ const BillState = (props)=>{
             billupdate[index].customer = customer;
             billupdate[index].discount = discount;
             billupdate[index].amount = amount;
-            billupdate[index].gst = gst;
+            billupdate[index].gstamount = gstamount;
             billupdate[index].products = products;
             break; 
           }
@@ -113,20 +113,39 @@ const BillState = (props)=>{
 
       //Delete a bill
 
-      const deleteBill = async (id)=> {
+      // const deleteBill = async (id)=> {
 
-        const response = await fetch(`${host}/api/bill/delete/${id}`,{
-          method: 'DELETE',
-          headers:{
+      //   const response = await fetch(`${host}/api/bill/delete/${id}`,{
+      //     method: 'PUT',
+      //     headers:{
+      //       'Content-Type': 'application/json',
+      //       'auth-token': localStorage.getItem('token')
+      //     }
+      //   });
+      //   const json = response.json();
+      //   console.log(json);
+
+        // let newbill = bills.filter((prod)=>{return prod._id!==id})
+        // setBills(newbill);
+      // }
+      const deleteBill = (id) => {
+        const option = {
+          method: 'PUT', headers: {
             'Content-Type': 'application/json',
             'auth-token': localStorage.getItem('token')
+          },
+          url: `${host}/api/bill/delete/${id}`
+        };
+        axios(option)
+        .then((e) => {
+          console.log(e,'e112');
+          if (e?.data?.found?._id) {
+            getBills();
           }
-        });
-        const json = response.json();
-        console.log(json);
-
-        let newbill = bills.filter((prod)=>{return prod._id!==id})
-        setBills(newbill);
+        })
+        .catch((err) => {
+          console.log(err,'err');
+        })
       }
 
       //Get list of products from database

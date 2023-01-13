@@ -1,7 +1,7 @@
 const express = require("express");
 const Category = require("../models/Category");
 const Product = require("../models/Product");
-
+const { ObjectId } = require("mongodb");
 const router = express.Router();
 const { body, validationResult } = require("express-validator");
 
@@ -10,7 +10,7 @@ const { body, validationResult } = require("express-validator");
 
 router.get('/view', async (req, res) => {
   try {
-    const categories = await Category.find();
+    const categories = await Category.find({deleted:false});
     res.json(categories);
   } catch (error) {
     console.error(error.message);
@@ -89,27 +89,51 @@ router.patch('/edit/:id',
   });
 
   // ROUTE4: delete category from : DELETE "/api/category/delete"
-router.delete('/delete/:id',
- async (req, res) => {
-    try {
+// router.delete('/delete/:id',
+//  async (req, res) => {
+//     try {
 
-        let found = await Category.findById(req.params.id);
-        if (!found) {
-          return res.status(404).send("Not Found");
-        }
+//         let found = await Category.findById(req.params.id);
+//         if (!found) {
+//           return res.status(404).send("Not Found");
+//         }
 
-      found = await Product.findOne({ category: req.params.id });
-      if (found) {
-        return res.status(400).json({ error: "Sorry! products in this category exists" });
+//       found = await Product.findOne({ category: req.params.id });
+//       if (found) {
+//         return res.status(400).json({ error: "Sorry! products in this category exists" });
+//       }
+
+//         found = await Category.findByIdAndDelete(req.params.id);
+//         res.status(200).json({"Success":"Category has been deleted", category:found})
+
+//     } catch (error) {
+//       console.error(error.message);
+//       res.status(500).send("Internal Server Error");
+//     }
+//   });
+
+router.put("/delete/:id", async (req, res)=>{
+  try{
+    try{
+      let found = await Category.findById(ObjectId(req.params.id));
+      if(!found){
+        return req.status(404).send("Not Found");
       }
-
-        found = await Category.findByIdAndDelete(req.params.id);
-        res.status(200).json({"Success":"Category has been deleted", category:found})
-
-    } catch (error) {
-      console.error(error.message);
-      res.status(500).send("Internal Server Error");
+    } catch(error){
+      console.log(error);
+      return res.status(400).json({error : "Wrong ID"});
     }
-  });
+      // found = await Product.findOne({ category: req.params.id });
+      // if (found) {
+      //   return res.status(400).json({ error: "Sorry! products in this category exists" });
+      // }
+
+      let found = await Category.findByIdAndUpdate(req.params.id, {$set: {deleted:true}},{new:true});
+      res.json({found});
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send("Internal Server Error");
+  }
+})
 
 module.exports = router;

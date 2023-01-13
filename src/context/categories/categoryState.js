@@ -1,5 +1,6 @@
 import CategoryContext from "./CategoryContext";
 import React, { useState } from "react";
+import axios from "axios";
 
 const CategoryState = (props) => {
 
@@ -67,19 +68,38 @@ const CategoryState = (props) => {
 
   // Delete a category
 
-  const deleteCategory = async (id)=>{
+  // const deleteCategory = async (id)=>{
 
-    const response = await fetch(`${host}/api/category/delete/${id}`, {
-      method: 'DELETE',
-      headers: {
+  //   const response = await fetch(`${host}/api/category/delete/${id}`, {
+  //     method: 'DELETE',
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //       'auth-token': localStorage.getItem('token')
+  //     },
+  //   });
+  //   const json  = response.json();
+  //   console.log(json);
+  //   let newCategories = categories.filter((category)=>{return category._id!==id})
+  //   setCategories(newCategories)
+  // }
+  const deleteCategory = (id) => {
+    const option = {
+      method: 'PUT', headers: {
         'Content-Type': 'application/json',
         'auth-token': localStorage.getItem('token')
       },
-    });
-    const json  = response.json();
-    console.log(json);
-    let newCategories = categories.filter((category)=>{return category._id!==id})
-    setCategories(newCategories)
+      url: `${host}/api/category/delete/${id}`
+    };
+    axios(option)
+    .then((e) => {
+      console.log(e,'e112');
+      if (e?.data?.found?._id) {
+        getCategory();
+      }
+    })
+    .catch((err) => {
+      console.log(err,'err');
+    })
   }
 
   // Edit a category

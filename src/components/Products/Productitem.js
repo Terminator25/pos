@@ -1,4 +1,5 @@
 import React, { useContext} from "react";
+// import Bill from "../../../backend/models/Bill";
 import ProductContext from "../../context/products/ProductContext";
 
 export default function Productitem(props) {
@@ -32,10 +33,12 @@ export default function Productitem(props) {
           categories.map((category)=>{
             return (category._id===product.category)?category.name:""
           })
-}
-<br/>SKU: {product.sku}<br/>Barcode: {product.barcode}
-        {/* <p className="card-text"></p> */}
-        <br/>ShortName: {product.shortname}</p>
+          }
+        {product.sku!==""?(<><br/>SKU: {product.sku}</>):null}
+        {product.barcode!==""?(<><br/>Barcode: {product.barcode}</>):null}
+        {product.shortname!==""?(<><br/>ShortName: {product.shortname}</>):null}
+        {product.gstrate!==null?(<><br/>GST: {product.gstrate}</>):null}
+        </p>
         <i className="fas fa-edit mx-2" onClick={()=>{updateProduct(product)}}></i>
         <i className="fa fa-trash mx-2" aria-hidden="true" onClick={handleClick}></i>
       </div>

@@ -1,33 +1,40 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
-const customerSchema = new Schema({
-    name: {
-      type: String,
-    },
+// const customerSchema = new Schema({
+//     name: {
+//       type: String,
+//     },
   
-    gst: {
-      type: String,
-    },
+//     gst: {
+//       type: String,
+//     },
   
-    address: {
-      type: String,
-    },
+//     address: {
+//       type: String,
+//     },
   
-    phno: {
-      type: String,
-    },
+//     phno: {
+//       type: String,
+//     },
   
-    email: {
-      type: String,
-    },
-  });
+//     email: {
+//       type: String,
+//     },
+//   });
 
 const billSchema = new Schema({
 
-    customer : customerSchema,
+    // customer : {
+    //     type: String
+    // },
+    customer : {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'customer',
+        default: null
+    },
 
-    products : [{pname : String, price : Number, quantity : Number}],
+    products : [{pname : String, price : Number, quantity : Number, gstrate : Number}],
 
     total : {
         type: Number,
@@ -53,15 +60,20 @@ const billSchema = new Schema({
         default : 0
     },
 
-    gst:{
+    gstamount:{
         type: Number,
         default:0
     },
 
     time:{
-        type: Date,
+        type: Date
+    },
+
+    deleted:{
+        type: Boolean,
+        default:false
     }
 
   });
 
-  module.exports = mongoose.model('bill', billSchema) || mongoose.model('customer', customerSchema);
+  module.exports = mongoose.model('bill', billSchema)

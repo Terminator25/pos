@@ -13,6 +13,7 @@ export default function Addproduct(props) {
     price: "",
     pname: "",
     shortname: "",
+    gstrate:""
   });
 
   useEffect(() => {
@@ -55,7 +56,8 @@ export default function Addproduct(props) {
         product.barcode,
         product.price,
         product.pname,
-        product.shortname
+        product.shortname,
+        product.gstrate
       );
      // console.log(product);
       setProduct({
@@ -65,6 +67,7 @@ export default function Addproduct(props) {
         price: "",
         pname: "",
         shortname: "",
+        gstrate: ""
       });
      // console.log(product);
       props.showAlert("Product Added!", "success");
@@ -184,16 +187,26 @@ export default function Addproduct(props) {
                 required
               />
             </div>
+
+            <div className="col-sm-4 mb-2">
+              <label htmlFor="gstrate" className="form-label">
+                GST On Product
+              </label>
+              <input
+                type="text"
+                className="form-control"
+                id="gstrate"
+                name="gstrate"
+                onChange={onChange}
+                value={product.gstrate}
+                required
+              />
+            </div>
           </div>
 
           <button
             disabled={
               product.pname.length < 3 ||
-              product.shortname.length < 3 ||
-              product.barcode.length < 3 ||
-              product.sku.length < 3 ||
-              product.price < 0 ||
-              product.category === "sel" ||
               product.price.toString().length < 1
             }
             type="submit"
