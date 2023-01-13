@@ -273,9 +273,10 @@ export default function Addbill(props) {
     let tax = gstvalue - (gstvalue*bill.discount) /100;
     setGST(tax.toFixed(2));
 
-    if(bill.paymentmode!=="Cash"){
+    // if(bill.paymentmode!=="Cash"){
     (initial?update(final_value, bill.billnumber, tstoken.txntoken) :initialize(final_value, bill.billnumber));
-    setIni(true);}
+    setIni(true);
+  // }
 
     // let billnumber = "billnumber";
     // setBill({ ...bill, [billnumber]: uuidv1().substring(0, 8) });
@@ -647,7 +648,7 @@ export default function Addbill(props) {
                 {gsttotal/2}
               </span>
              <button
-                disabled={total===0}
+                disabled={total===0 || bill.paymentmode==="Cash"}
                 type="submit"
                 className="btn btn-primary mb-3"
                 onClick={handleClickPayment}

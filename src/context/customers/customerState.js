@@ -76,7 +76,7 @@ const CustomerState = (props)=>{
     }
 
     setCustomers(newcust);
-    
+    getCustomer();
   }
 
   // Delete a customer

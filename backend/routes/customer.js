@@ -107,7 +107,7 @@ router.put("/edit/:id", async (req, res) => {
       //       error: "Sorry! a customer with same mobile number already exists",
       //     });
       // }
-      if(req.body.phno!==""){newcust.phno = req.body.phno;}
+      newcust.phno = req.body.phno;
     // }
 
         if (req.body.name.length<3) {
@@ -142,6 +142,29 @@ router.put("/edit/:id", async (req, res) => {
       { $set: newcust },
       { new: true }
     );
+
+    if(newcust.phno==="")
+    {
+      found = await Customer.findByIdAndUpdate(req.params.id, {$unset: {phno:""} }, {new: true})
+    }
+    if(newcust.email==="")
+    {
+      found = await Customer.findByIdAndUpdate(req.params.id, {$unset: {email:""} }, {new: true})
+    }
+    if(newcust.address==="")
+    {
+      found = await Customer.findByIdAndUpdate(req.params.id, {$unset: {address:""} }, {new: true})
+    }
+    if(newcust.state==="")
+    {
+      found = await Customer.findByIdAndUpdate(req.params.id, {$unset: {state:""} }, {new: true})
+    }
+    if(newcust.pin==="")
+    {
+      found = await Customer.findByIdAndUpdate(req.params.id, {$unset: {pin:""} }, {new: true})
+    }
+    
+    
     res.json({ found });
   } catch (error) {
     console.error(error.message);
