@@ -19,7 +19,7 @@
     const [products, setProducts] = useState([]);
 
     //Create a customer state
-    const [customer, setCustomer] = useState({ name: "", gst: "", address: "", phno: "", email: "", state: "", pin: "", entity: "" });
+    // const [customer, setCustomer] = useState({ name: "", gst: "", address: "", phno: "", email: "", state: "", pin: "", entity: "" });
 
     //State to check cost change
     const [changecost, setChange] = useState(0)
@@ -137,6 +137,7 @@
         setEdithide( edithide=> [...edithide, element.pname])
       });
       handleShow();
+      // console.log(bill, "Inactive")
     };
 
     // console.log(bill, "Active bill");
@@ -206,7 +207,7 @@
         <div className="container">
           {bills.length === 0 && "No Bills created"}
         </div>
-        <div className="row my-3">
+        <div className="row my-2">
           <h2>Transactions</h2>
           <br />
           {bills.slice(0).reverse().map((bill) => {
@@ -423,17 +424,19 @@
                   <strong>The Total is : </strong>
                   {total}
                 </span>
-                {customer.state!=="Haryana" & customer.entity==="Company"?
+                {/* {customer.state!=="Haryana" & customer.entity==="Company"?
               (<span className="mx-4">
                 <strong>IGST : </strong>
                 {gsttotal}
-                </span>):(<span className="mx-4">
+                </span>): */}
+                <span className="mx-4">
                 <strong>CGST : </strong>
                 {gsttotal/2}
                 <br/>
                 <strong>SGST : </strong>
                 {gsttotal/2}
-              </span>)}
+              </span>
+              {/* )} */}
               </div>
             </form>
           </Modal.Body>

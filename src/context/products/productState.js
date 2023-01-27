@@ -137,10 +137,23 @@ const ProductState = (props)=>{
     })
   }
 
+  const addmultiple = (parseddata) =>{
+    const option = {
+      method: 'POST', headers:{
+        'Content-Type':'application/json',
+        'auth-token': localStorage.getItem('token')
+      },
+      data: JSON.stringify(parseddata),
+      url:`${host}/api/product/addmultiple`
+    };
+    axios(option)
+    .then((e) =>{setProducts(products.concat(e.data));})
+    .catch(err=>{console.log(err, 'err')})
+  }
 
     
     return (
-        <ProductContext.Provider value={{products, setProducts, categories, addProduct, getProducts, getCategory, editProduct, deleteProduct}}>
+        <ProductContext.Provider value={{products, setProducts, categories, addProduct, getProducts, getCategory, editProduct, deleteProduct, addmultiple}}>
             {props.children}
         </ProductContext.Provider>
     )

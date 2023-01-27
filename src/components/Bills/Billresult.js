@@ -8,7 +8,7 @@ import Tooltip from 'react-bootstrap/Tooltip';
 
 export default function Billresult(props) {
     const context = useContext(BillContext);
-    const { productlist, getProducts, editBill } = context;
+    const { productlist, getProducts, editBill, getCustomers, customers } = context;
 
     let { bills } = props;
 
@@ -23,7 +23,7 @@ export default function Billresult(props) {
     const [products, setProducts] = useState([]);
 
     //Create a customer state
-    const [customer, setCustomer] = useState({ name: "", gst: "", address: "", phno: "", email: "", state: "", pin: "", entity: "" });
+    // const [customer, setCustomer] = useState({ name: "", gst: "", address: "", phno: "", email: "", state: "", pin: "", entity: "" });
 
     //State to check cost change
     const [changecost, setChange] = useState(0)
@@ -35,7 +35,7 @@ export default function Billresult(props) {
     const [bill, setBill] = useState({
       id: "",
       total: "",
-      customer: {},
+      customer: null,
       discount: 0,
       amount: "",
       gstamount: 0,
@@ -70,10 +70,10 @@ export default function Billresult(props) {
     };
 
     //Update customer state
-    const handleCustomer = (e) => {
-      const { name, value } = e.target;
-      setCustomer((prevState) => ({ ...prevState, [name]: value }));
-    };
+    // const handleCustomer = (e) => {
+    //   const { name, value } = e.target;
+    //   setCustomer((prevState) => ({ ...prevState, [name]: value }));
+    // };
 
     const handleProduct = (e) => {
       const { name, value } = e.target;
@@ -130,13 +130,13 @@ export default function Billresult(props) {
 
     const updateBill= (billitem) => {
       setProducts(billitem.products);
-      setCustomer(billitem.customer);
+      // setCustomer(billitem.customer);
       setTotal(billitem.total);
       setGST(billitem.gstamount);
       setBill({
         id:billitem._id,
       total: billitem.total,
-      customer: customer,
+      customer: billitem.customer,
       discount: billitem.discount,
       amount: billitem.amount,
       gstamount: billitem.gstamount,
@@ -154,19 +154,10 @@ export default function Billresult(props) {
 
     const handleEdit =(e) =>{
       e.preventDefault();
-      if(customer.name===""){customer.name=undefined};
-      if(customer.phno===""){customer.phno=undefined};
-      if(customer.address===""){customer.address=undefined};
-      if(customer.gst===0){customer.gst=undefined};
-      if(customer.email===""){customer.email=undefined};
-      if(customer.state===""){customer.state=undefined};
-      if(customer.pin===""){customer.pin=undefined};
-      if(customer.entity===""){customer.entity=undefined};
-      // return;
       editBill(
         bill.id,
         (bill.total=total),
-        (bill.customer=customer),
+        bill.customer || null,
         bill.discount,
         (bill.amount=cost),
         bill.gstamount,
@@ -184,6 +175,7 @@ export default function Billresult(props) {
 
     useEffect(() => {
       getProducts();
+      getCustomers();
       //eslint-disable-next-line
     }, []);
 
@@ -228,17 +220,24 @@ export default function Billresult(props) {
       <>
         <div className="container">
             <h4>Search Results</h4>
-            <h5>{bills.length === 0 && "No Bills Matching  Search Criteria"}</h5>
-            <br/>
+            {/* <h5>{bills.length === 0 && "No Bills Matching  Search Criteria"}</h5>
+            <br/> */}
         </div>
         <div className="row my-3">
-          {searchresults.map((bill) => {
+          {bills.length===0?(<h5>No Bills Matching  Search Criteria</h5>):searchresults.map((bill) => {
             return (
               <Billitem 
               removebill={removebill} 
               updateBill={updateBill} bill={bill} key={bill._id} showAlert={props.showAlert} />
             );
           })}
+          {/* {searchresults.map((bill) => {
+            return (
+              <Billitem 
+              removebill={removebill} 
+              updateBill={updateBill} bill={bill} key={bill._id} showAlert={props.showAlert} />
+            );
+          })} */}
         </div>
         {/* <Button variant="outline-light" onClick={handleShow} ref={ref}>
         </Button> */}
@@ -249,7 +248,7 @@ export default function Billresult(props) {
           </Modal.Header>
           <Modal.Body>
             <form className="my-3" onSubmit={handleSubmit}>
-                <div className="row">
+              {/* <div className="row">
                   <h4>Customer Details</h4>
                   <div className="col-sm mb-3">
                     <label>Name</label>
@@ -302,6 +301,31 @@ export default function Billresult(props) {
                       value={customer.address}
                     />
                   </div>
+                </div>
+              </div> */}
+                            <div className="row">
+                <h4>Customer Details</h4>
+                <div className="cols-sm mb-3">
+                <select
+                    id="customer"
+                    name="customer"
+                    className="form-select"
+                    aria-label="Customer Name"
+                    onChange={onChange}
+                  >
+                    {/* selected={product.category === "sel" ? "selected" : ''} */}
+                    <option key="sel" value={null} selected={bill.customer === "sel" ? "selected" : null}>
+                      Customer Name
+                    </option>
+                    {customers.map((user) => {
+                      return (
+                        <option key={user._id} value={user._id}>
+                          {user.name}
+                        </option>
+                      );
+                    })}
+                    <option value="" >Remove Customer Details</option>
+                  </select>
                 </div>
               </div>
               <div className="row">
@@ -422,17 +446,19 @@ export default function Billresult(props) {
                   <strong>The Total is : </strong>
                   {total}
                 </span>
-                {customer.state!=="Haryana" & customer.entity==="Company"?
+                {/* {customer.state!=="Haryana" & customer.entity==="Company"?
               (<span className="mx-4">
                 <strong>IGST : </strong>
                 {gsttotal}
-                </span>):(<span className="mx-4">
+                </span>): */}
+                <span className="mx-4">
                 <strong>CGST : </strong>
                 {gsttotal/2}
                 <br/>
                 <strong>SGST : </strong>
                 {gsttotal/2}
-              </span>)}
+              </span>
+              {/* )} */}
               </div>
             </form>
           </Modal.Body>

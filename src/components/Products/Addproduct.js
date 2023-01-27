@@ -1,9 +1,10 @@
 import React, { useContext, useState, useEffect } from "react";
 import ProductContext from "../../context/products/ProductContext";
+import Papa from "papaparse";
 
 export default function Addproduct(props) {
   const context = useContext(ProductContext);
-  const { products, addProduct, categories, getProducts, getCategory } =
+  const { products, addProduct, categories, getProducts, getCategory, addmultiple } =
     context;
 
   const [product, setProduct] = useState({
@@ -16,12 +17,32 @@ export default function Addproduct(props) {
     gstrate:""
   });
 
+  // const [selectedFile, setSelectedFile] = useState(null);
+  const [parsedData, setParsedData] = useState([]);
+
   useEffect(() => {
     getProducts();
     // eslint-disable-next-line
     getCategory();
     // eslint-disable-next-line
   }, []);
+  const handleParse = (e) =>{
+    Papa.parse(e.target.files[0],{
+      header:true,
+      dynamicTyping:true,
+      skipEmptyLines: true,
+      complete:results=> {
+        // console.log("Parsed Results",results);
+        setParsedData(results.data)}
+    });
+  };
+
+  // console.log('new entries', parsedData);
+
+  const handleMultiple =(e)=>{
+    addmultiple(parsedData);
+    setParsedData([]);
+  }
 
   const handleClick = (e)=> {
     e.preventDefault();
@@ -215,6 +236,15 @@ export default function Addproduct(props) {
           >
             Add
           </button>
+        </form>
+        <form className="my-3">
+          <input type="file"
+          className="form-control"
+          id="import"
+          name="import"
+          onChange={handleParse}
+          />
+          <button type="submit" className="btn btn-primary" onClick={handleMultiple}>Import Data</button>
         </form>
       </div>
     </div>

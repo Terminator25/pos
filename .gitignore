@@ -11,6 +11,7 @@
 
 # production
 /build
+.Password.txt
 
 # misc
 .DS_Store

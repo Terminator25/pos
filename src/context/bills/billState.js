@@ -63,17 +63,18 @@ const BillState = (props)=>{
       //   setResult(json);
       // }
       
-      const findBills = (phno, time, billnumber) => {
+      const findBills = (name, time, billnumber) => {
         const option = {
           method:'POST', headers:{
             'Content-Type': 'application/json',
             'auth-token': localStorage.getItem('token')
           },
-          data: JSON.stringify({phno, time, billnumber}),
+          data: JSON.stringify({name,  time, billnumber}),
           url: `${host}/api/bill/find`
         };
         axios(option)
         .then((e) => {
+          console.log("Search Result",e?.data);
           setResult(e?.data);
         })
         .catch(err => {

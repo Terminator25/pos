@@ -26,7 +26,7 @@ export default function Billitem(props) {
 
   return (
     <div className="container">
-      <div className="card my-3">
+      <div className="card my-2 col-sm-3">
         <div className="card-body">
           <h5 className="card-title">Bill Number: {bill.billnumber}</h5>
           <div className="card-text">

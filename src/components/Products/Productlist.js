@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import ProductContext from "../../context/products/ProductContext";
 import Productitem from "./Productitem";
+import ReactPaginate from "react-paginate";
 
 export default function Productlist(props) {
   const context = useContext(ProductContext);
@@ -24,6 +25,8 @@ export default function Productlist(props) {
     egstrate: ""
   });
 
+  const [currentPage, setCurrentPage] = useState(0);
+
   const updateProduct = (prod) => {
     ref.current.click();
     setProduct({
@@ -46,33 +49,32 @@ export default function Productlist(props) {
   };
 
   const handleClick = (e) => {
-    console.log('hi')
     e.preventDefault();
-    let present = false;
-    let mess = "";
+    // let present = false;
+    // let mess = "";
 
-    for (let index = 0; index < products.length; index++) {
-      const element = products[index];
-      if ((element.barcode === product.ebarcode ) && (element._id !== product.id )) {
-        present = true;
-        mess = "Product with same barcode already exists";
-        break;
-      }
-      if (element.sku === product.esku && (element._id !== product.id )) {
-        present = true;
-        mess = "Product with same SKU already exists";
-        break;
-      }
-      if (element.pname === product.epname && (element._id !== product.id )) {
-        present = true;
-        mess = "Product with same name already exists";
-        break;
-      }
-    }
+    // for (let index = 0; index < products.length; index++) {
+    //   const element = products[index];
+    //   if ((element.barcode === product.ebarcode ) && (element._id !== product.id )) {
+    //     present = true;
+    //     mess = "Product with same barcode already exists";
+    //     break;
+    //   }
+    //   if (element.sku === product.esku && (element._id !== product.id )) {
+    //     present = true;
+    //     mess = "Product with same SKU already exists";
+    //     break;
+    //   }
+    //   if (element.pname === product.epname && (element._id !== product.id )) {
+    //     present = true;
+    //     mess = "Product with same name already exists";
+    //     break;
+    //   }
+    // }
 
-    if (present) {
-        props.showAlert(mess, "danger");
-      } else {
+    // if (present) {
+    //     props.showAlert(mess, "danger");
+    //   } else {
 
         editProduct(product.id         , product.ecategory,
             product.esku,
@@ -84,7 +86,7 @@ export default function Productlist(props) {
 
             props.showAlert("Product Updated!", "success");
 
-      }
+      // }
 
       refClose.current.click();
 
@@ -93,6 +95,28 @@ export default function Productlist(props) {
   const onChange = (e) => {
     setProduct({ ...product, [e.target.name]: e.target.value });
   };
+
+  // const handlePageClick = (e) =>{
+  //   setCurrentPage(e);
+  // };
+
+  function handlePageClick({ selected: selectedPage }) {
+    setCurrentPage(selectedPage);
+  }
+
+  const PER_PAGE = 12;
+  const offset = currentPage*PER_PAGE;
+  const currentPageData = products.slice(offset, offset + PER_PAGE).map((product) => {
+    return (
+      <Productitem
+        key={product._id}
+        updateProduct={updateProduct}
+        product={product}
+        showAlert={props.showAlert}
+      />
+    );
+  })
+  const pageCount = Math.ceil(products.length / PER_PAGE);  
 
   return (
     <>
@@ -264,13 +288,13 @@ export default function Productlist(props) {
                 Close
               </button>
               <button
-                disabled={product.epname.length < 3 ||
-                  product.eshortname.length < 3 ||
-                  product.ebarcode.length < 3 ||
-                  product.esku.length < 3 ||
-                  product.eprice < 0 ||
-                  product.ecategory === "sel" ||
-                  product.eprice.toString().length < 1}
+                // disabled={product.epname.length < 3 ||
+                //   product.eshortname.length < 3 ||
+                //   product.ebarcode.length < 3 ||
+                //   product.esku.length < 3 ||
+                //   product.eprice < 0 ||
+                //   product.ecategory === "sel" ||
+                //   product.eprice.toString().length < 1}
                 type="button"
                 onClick={handleClick}
                 className="btn btn-primary"
@@ -282,7 +306,7 @@ export default function Productlist(props) {
         </div>
       </div>
 
-      <div className="row my-3">
+      {/* <div className="row my-3">
         <h2>Saved Products</h2> <br />
         <br />
         {products.map((product) => {
@@ -295,7 +319,22 @@ export default function Productlist(props) {
             />
           );
         })}
-      </div>
+      </div> */}
+      <div className="row my-3">
+      <h1 className="my-3">Products Paginated</h1>
+      {currentPageData}
+      <ReactPaginate
+        previousLabel="← Previous"
+        nextLabel="Next →"
+        pageCount={pageCount}
+        onPageChange={handlePageClick}
+        containerClassName={"pagination"}
+        previousLinkClassName={"pagination__link"}
+        nextLinkClassName={"pagination__link"}
+        disabledClassName={"pagination__link--disabled"}
+        activeClassName={"pagination__link--active"}
+      />
+    </div>
     </>
   );
 }

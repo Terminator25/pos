@@ -140,18 +140,50 @@ router.post("/find", async(req, res)=>{
   //       res.status(500).send("Internal Server Error");
   //     }
     try{
-    let search;
-    let tomorrow = new Date(req.body.time)
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    if(req.body.billnumber!==""&& req.body.phno==="" && req.body.time==="")
-    {search=await Bill.find({billnumber:req.body.billnumber})}
-    else if(req.body.phno!=="" && req.body.time!==""&& req.body.billnumber==="")
-    {search=await Bill.find({$and:[{'customer.phno':req.body.phno}, {time:{$gte:new Date(req.body.time), $lt:new Date(tomorrow)}}]})}
-    else if(req.body.phno!=="" && req.body.time==="" && req.body.billnumber==="")
-    {search=await Bill.find({'customer.phno':req.body.phno})}
-    else
-    {search=await Bill.find({time:{$gte:new Date(req.body.time), $lt:new Date(tomorrow)}})}
+    // let search;
+    // let tomorrow = new Date(req.body.time)
+    // tomorrow.setDate(tomorrow.getDate() + 1);
+    // if(req.body.billnumber!==""&& req.body.phno==="" && req.body.time==="")
+    // {search=await Bill.find({billnumber:req.body.billnumber})}
+    // else if(req.body.phno!=="" && req.body.time!==""&& req.body.billnumber==="")
+    // {search=await Bill.find({$and:[{'customer.phno':req.body.phno}, {time:{$gte:new Date(req.body.time), $lt:new Date(tomorrow)}}]})}
+    // else if(req.body.phno!=="" && req.body.time==="" && req.body.billnumber==="")
+    // {search=await Bill.find({'customer.phno':req.body.phno})}
+    // else
+    // {search=await Bill.find({time:{$gte:new Date(req.body.time), $lt:new Date(tomorrow)}})}
     
+      let search=[];
+      let range= req.body.time;
+      let start= new Date(range[0].startDate);
+      let end= new Date(range[0].endDate);
+      // let tomorrow = new Date(req.body.time);
+      // tomorrow.setDate(tomorrow.getDate()+1);
+      end.setDate(end.getDate()+1);
+      let condition;
+
+      if(req.body.billnumber!==""){condition=1}
+      else if(req.body.name!==""){condition=2}
+      // (req.body.time!=="")
+      else{condition=3};
+
+      switch(condition){
+        case 1:
+          search = await Bill.find({billnumber:req.body.billnumber, deleted: false});
+          break;
+        
+        case 2:
+          search = await Bill.find({customer:req.body.name, deleted:false});
+          break;
+
+        // case 3:
+        //   search = await Bill.find({time:{$gte:new Date(req.body.time), $lt:new Date(tomorrow)}, deleted: false});
+        //   break;
+        case 3:
+          search = await Bill.find({time:{$gte:new Date(start), $lt:new Date(end)}, deleted: false});
+          break;
+
+      }
+
     // ({$or:[{time:req.body.time},{'customer.phno':req.body.customer.phno}]})
     // {$and:[{'customer.phno':req.body.customer.phno}, {time:req.body.time}]},
     res.json(search);

@@ -93,45 +93,45 @@ router.put("/edit/:id", async (req, res) => {
     const newprod = {};
 
     if (req.body.category) {
-      try {
-        let found = await Category.findById(ObjectId(req.body.category));
-        if (!found) {
-          return res.status(400).json({ error: "Sorry! category not found" });
-        }
-      } catch (error) {
-        return res.status(400).json({ error: "Sorry! category not found" });
-      }
+      // try {
+      //   let found = await Category.findById(ObjectId(req.body.category));
+      //   if (!found) {
+      //     return res.status(400).json({ error: "Sorry! category not found" });
+      //   }
+      // } catch (error) {
+      //   return res.status(400).json({ error: "Sorry! category not found" });
+      // }
 
       newprod.category = req.body.category;
     }
 
     if (req.body.sku) {
-      let found = await Product.findOne({ sku: req.body.sku });
-      // console.log(found._id)
-      // console.log(ObjectId(req.params.id))
-      // console.log()
-      if (found && !found._id.equals(req.params.id)) {
-        //console.log("found");
-        return res
-          .status(400)
-          .json({ error: "Sorry! a product with same sku already exists" });
-      }
-      if (req.body.sku.length < 3) {
-        return res.status(400).json({ error: "Enter a valid SKU" });
-      }
+      // let found = await Product.findOne({ sku: req.body.sku });
+      // // console.log(found._id)
+      // // console.log(ObjectId(req.params.id))
+      // // console.log()
+      // if (found && !found._id.equals(req.params.id)) {
+      //   //console.log("found");
+      //   return res
+      //     .status(400)
+      //     .json({ error: "Sorry! a product with same sku already exists" });
+      // }
+      // if (req.body.sku.length < 3) {
+      //   return res.status(400).json({ error: "Enter a valid SKU" });
+      // }
       newprod.sku = req.body.sku;
     }
 
     if (req.body.barcode) {
-      let found = await Product.findOne({ barcode: req.body.barcode });
-      if (found && !found._id.equals(req.params.id)) {
-        return res
-          .status(400)
-          .json({ error: "Sorry! a product with same barcode already exists" });
-      }
-      if (req.body.barcode.length < 3) {
-        return res.status(400).json({ error: "Enter a valid barcode" });
-      }
+      // let found = await Product.findOne({ barcode: req.body.barcode });
+      // if (found && !found._id.equals(req.params.id)) {
+      //   return res
+      //     .status(400)
+      //     .json({ error: "Sorry! a product with same barcode already exists" });
+      // }
+      // if (req.body.barcode.length < 3) {
+      //   return res.status(400).json({ error: "Enter a valid barcode" });
+      // }
       newprod.barcode = req.body.barcode;
     }
 
@@ -212,5 +212,16 @@ router.put("/delete/:id", async (req, res)=>{
     res.status(500).send("Internal Server Error");
   }
 })
+
+//route 5: insert additional objects through array of objects
+router.post("/addmultiple",async(req, res)=>{
+  try{
+    const savedproduct=Product.insertMany(req.body)
+    console.log(savedproduct);
+  }catch(err){
+    console.error(err.message);
+    res.status(500).send("Internal Server Error");
+  }
+});
 
 module.exports = router;
