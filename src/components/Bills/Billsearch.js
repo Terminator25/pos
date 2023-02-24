@@ -2,7 +2,7 @@ import React, { useContext, useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import BillContext from "../../context/bills/BillContext";
 import Billresult from "./Billresult";
-import { DateRange } from 'react-date-range';
+import { DateRange } from "react-date-range";
 
 export default function Billsearch(props) {
     const state = useLocation();
@@ -25,29 +25,26 @@ export default function Billsearch(props) {
         }
       ])
 
-    const [disable, setDisable] = useState(true)
     const [customer, setCustomer] = useState("");
     const [initialized, setIni] = useState(0)
+    const [selectDate, setSelectDate] = useState(false);
     
     const onChange = (e) => {
         setBill({ ...bill, [e.target.name]: e.target.value });
-        setDisable(false);
     };
     
     const setRange = (e)=>{
         setDate([e.selection]);
-        setDisable(false);
     };
 
     const onChangeCustomer = (e) => {
         setCustomer(e.target.value);
-        setDisable(false);
     }
  
     useEffect(()=>{
-        // if(state.state!=='')
-        // {setBill({...bill, phno:state.state});
-        // state.state='';}
+        if(state.state!=='')
+        {setCustomer(state.state);
+        state.state='';}
 
         getCustomers();
         //eslint-disable-next-line
@@ -63,7 +60,7 @@ export default function Billsearch(props) {
     },[customer])
 
     const onClick = (e) =>{
-        
+        e.preventDefault();
         customers.map((user)=>{
             return (user.name===customer)?(
                 setBill({...bill, name:user._id})
@@ -84,12 +81,13 @@ export default function Billsearch(props) {
           });
         setCustomer("");
         setIni(1);
-        setDisable(true);
+    }
+
+    const onClickDate = (e) =>{
+        e.preventDefault();
+        setSelectDate(!selectDate);
     }
     
-    console.log("Bill.Time", bill.time);
-    console.log("DateRange", dates)
-
     return(
         <>
         <div className="container">
@@ -122,25 +120,26 @@ export default function Billsearch(props) {
                 </div> */}
                 <div className="col-sm-4">
                     <label>Date of Bill</label>
-                    {/* <input
-                    type="date"
-                    className="form-control"
-                    name="time"
-                    onChange={onChange}
-                    value={bill.time}
-                    /> */}
-                    <DateRange
+                    <br/>
+                    <button className="bg-white rounded text-black my-1" onClick={onClickDate}>Open Calendar</button>
+                    {selectDate ?(<DateRange
                         editableDateInputs={true}
-                        // onChange={item => setDate([item.selection])}
                         onChange={setRange}
                         moveRangeOnFirstSelection={false}
                         ranges={dates}
                         dateDisplayFormat="dd-MM-yyyy"
-                        // showMonthArrow={false}
-                        // showSelectionPreview={false}
-                        // showDateDisplay={false}
-                    />
+                    />): null}
                 </div>
+                {/* <div className="col-sm-4">
+                    <label>Date of Bill</label>
+                    <DateRangePicker
+                        editableDateInputs={true}
+                        onChange={setRange}
+                        moveRangeOnFirstSelection={false}
+                        ranges={dates}
+                        dateDisplayFormat="dd-MM-yyyy"
+                    />
+                </div> */}
                 <div className="col-sm-3">
                     <label>Bill Number</label>
                     <input
@@ -153,7 +152,7 @@ export default function Billsearch(props) {
                     />
                 </div>
                 <div className="col-sm-2 my-4">
-                    <button id='search' disabled={disable} className="bg-primary rounded text-white" type="submit" onClick={onClick}>Submit</button>
+                    <button id='search' className="bg-primary rounded text-white my-1" type="submit" onClick={onClick}>Submit</button>
                 </div>
             </div>
         </form>

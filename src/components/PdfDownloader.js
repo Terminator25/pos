@@ -35,7 +35,7 @@ const PdfDownloader = ({rootElementId, DownloadFileName}) => {
                 pdf.save(`${DownloadFileName}.pdf`);
             })
     }
-    return <button type="button" className="btn btn-light btn-sm badge" style={{fontSize:"0.75rem"}} onClick={downloadPdfDocument}>Download PDF</button>
+    return <button type="button" className="btn btn-primary btn-sm badge" style={{fontSize:"0.75rem"}} onClick={downloadPdfDocument}>Print Bill</button>
 }
 
 export default PdfDownloader;

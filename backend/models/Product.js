@@ -21,6 +21,11 @@ const productSchema = new Schema({
         required : true
     },
 
+    market_price:{
+        type : Number,
+        default : 0
+    },
+
     pname:{
         type : String,
         required : true

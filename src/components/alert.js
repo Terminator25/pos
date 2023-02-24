@@ -18,17 +18,3 @@ export const Alert = (props) => {
         </>
     )
 }
-
-// <Snackbar
-// anchorOrigin={{ }}
-// open={alert}
-// onClose={handleAlert}
-// TransitionComponent={Fade}
-// message="Display Name Updated Successfully"
-// key={Fade}
-// action={
-//   <IconButton aria-label="close" color="inherit" onClick={handleAlert}>
-//     <CloseIcon />
-//   </IconButton>
-// }
-// />

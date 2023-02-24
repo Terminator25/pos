@@ -1,12 +1,21 @@
-import React, { useContext} from "react";
+import React, { useContext, useState, useEffect} from "react";
 // import Bill from "../../../backend/models/Bill";
 import ProductContext from "../../context/products/ProductContext";
+import Form from 'react-bootstrap/Form'
+import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
+import Tooltip from 'react-bootstrap/Tooltip';  
 
 export default function Productitem(props) {
 
-    const context = useContext(ProductContext);
-  const { product, updateProduct } = props;
-  const { deleteProduct, categories} = context;
+  const context = useContext(ProductContext);
+  const { product, updateProduct, handleSelect, selectedIds } = props;
+  const { deleteProduct} = context;
+
+  const selectCard = (e)=>{
+    e.preventDefault();
+    if(selectedIds.length<10 || (selectedIds.includes(product._id)))
+    {clickCard();}
+  }
 
   const handleClick = (e)=>{
 
@@ -16,33 +25,83 @@ export default function Productitem(props) {
     }
 
     else{
-
-    
         deleteProduct(product._id); 
       props.showAlert("Product Deleted!", "success");}
 
   }
 
+  const [use, setUse]= useState(false);
+
+  useEffect(()=>{  
+    if(selectedIds.length>9 && !(selectedIds.includes(product._id)))
+    {
+      setUse(true);
+    }
+    else
+    {
+      setUse(false);
+    }
+  }, // eslint-disable-next-line
+  [selectedIds]);
+
+  const [toggle, setToggle] = useState();
+  useEffect(()=>{  
+
+    if(selectedIds.includes(product._id)){
+      setToggle(true);
+    }
+    else{
+      setToggle(false);
+    }
+  }, // eslint-disable-next-line
+  [selectedIds]);
+  // eslint-disable-next-line
+
+
+  const clickCard = (e)=>{
+    handleSelect(product, toggle);
+    setToggle(!toggle);
+  }
   return (
-    <div className="col-md-3">
-    <div className="card my-3">
-      <div className="card-body">
-        <h5 className="card-title">{product.pname}</h5>
-        <p className="card-text">Price: Rs. {product.price}
-        <br/>Category: {
-          categories.map((category)=>{
-            return (category._id===product.category)?category.name:""
-          })
-          }
-        {product.sku!==""?(<><br/>SKU: {product.sku}</>):null}
-        {product.barcode!==""?(<><br/>Barcode: {product.barcode}</>):null}
-        {product.shortname!==""?(<><br/>ShortName: {product.shortname}</>):null}
-        {product.gstrate!==null?(<><br/>GST: {product.gstrate}</>):null}
-        </p>
-        <i className="fas fa-edit mx-2" onClick={()=>{updateProduct(product)}}></i>
-        <i className="fa fa-trash mx-2" aria-hidden="true" onClick={handleClick}></i>
-      </div>
-    </div>
-  </div>
+    <li className="list-group-item my-2 d-flex justify-content-between">
+        <div className="position-relative">
+          <OverlayTrigger overlay={(selectedIds.length>9?(<Tooltip id="tooltip-disabled">Atmost 10 items can be deleted at a time</Tooltip>):<span></span>)}>
+          <a href="#" 
+          disabled={use} 
+          className="stretched-link text-decoration-none text-black" onClick={selectCard}><h5 className="card-title">{product.pname}</h5></a>
+          </OverlayTrigger>
+          <p>Price: Rs. {product.price}</p>
+        </div>
+        <div>
+            
+              <OverlayTrigger placement="left" overlay={(selectedIds.length>9?(<Tooltip id="tooltip-disabled">Atmost 10 items can be deleted at a time</Tooltip>):<span></span>)}><span>
+              <Form>
+              <Form.Check
+                disabled={use}
+                type="checkbox"
+                id="switch-default"
+                value={toggle}
+                onChange={clickCard}
+                checked={toggle}
+              />
+              </Form>
+              </span>
+              </OverlayTrigger>
+            
+            <i className="fa fa-edit my-3" onClick={()=>{updateProduct(product)}}></i>
+            <i className="fa fa-trash my-3 mx-2" aria-hidden="true" onClick={handleClick}></i>
+        </div>
+        {/* <p className="card-text mx-3 position-relative">Price: Rs. {product.price}
+            {product.category!==undefined?(<><br/>Category: {
+              categories.map((category)=>{
+                return (category._id===product.category)?category.name:""
+              })
+              }</>):null}
+            {product.sku!==undefined?(<><br/>SKU: {product.sku}</>):null}
+            {product.barcode!==undefined?(<><br/>Barcode: {product.barcode}</>):null}
+            {product.shortname!==undefined?(<><br/>ShortName: {product.shortname}</>):null}
+            {product.gstrate!==null?(<><br/>GST: {product.gstrate}</>):null}
+            </p> */}
+    </li>
   )
 }

@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, { useContext, useState, useEffect, useRef } from "react";
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import BillContext from "../../context/bills/BillContext";
@@ -82,6 +82,8 @@ export default function Addbill(props) {
   const onChange = (e) => {
     setBill({ ...bill, [e.target.name]: e.target.value });
   };
+
+  const execute=useRef(null)
 
   //State to set hidden items
   const [hide, setHide]=useState([]);
@@ -194,6 +196,8 @@ export default function Addbill(props) {
 
   const handleClose = () => {
     setShow(false);
+    if (txndata.RESPMSG==="Txn Success")
+    {execute.current.click();} 
   };
 
   useEffect(() => {
@@ -351,7 +355,8 @@ export default function Addbill(props) {
       setTotal(0);
       setGST(0);
       setHide([]);
-      props.showAlert("Customer Added!", "success");
+      setIni(false);
+      props.showAlert("Bill Created", "success");
     }
   };
 
@@ -386,7 +391,6 @@ export default function Addbill(props) {
         <div className="container my-3">
           <h2>Billing</h2>
           <form className="my-3">
-            <div>
               <div className="row">
                 <h4>Customer Details</h4>
                 <div className="col-sm mb-3">
@@ -409,12 +413,12 @@ export default function Addbill(props) {
                     id="customer"
                     name="customer"
                     className="form-select"
-                    aria-label="Customer Name"
+                    aria-label="Select Customer Name"
                     onChange={onChange}
                   >
                     {/* selected={product.category === "sel" ? "selected" : ''} */}
                     <option key="sel" value="sel" selected={bill.customer === "sel" ? "selected" : null}>
-                      Customer Name
+                      Select Customer Name
                     </option>
                     {customers.map((user) => {
                       return (
@@ -467,9 +471,8 @@ export default function Addbill(props) {
                     value={customer.address}
                   />
                 </div> */}
-              </div>
-            </div>
-            <div className="row">
+              {/* </div>
+            <div className="row"> */}
               <div className="col-sm mb-3">
                 <label>Payment Mode</label>
                 <select
@@ -606,7 +609,7 @@ export default function Addbill(props) {
               </span>
             </div>
             <div className="row">
-              <div className="col-sm mb-3">
+              <div className="col-sm-2 mb-3">
                 <label>Discount (Percent) </label>
                 <input
                   type="text"
@@ -616,51 +619,52 @@ export default function Addbill(props) {
                   value={bill.discount}
                 />
               </div>
-            </div>
-            <div className="mb-3 d-flex justify-content-start">
-              <button
-                type="submit"
-                className="btn btn-primary mb-3"
-                onClick={CalculateTotal}
-              >
-                Calculate Total
-              </button>
-              <span className="mx-4">
-                <strong>The Total is : </strong>
-                {total}
-              </span>
-              {/* {customer.state!=="Haryana" & customer.entity==="Company"?
-              (<span className="mx-4">
-                <strong>IGST : </strong>
-                {gsttotal}
-                </span>):(<span className="mx-4">
-                <strong>CGST : </strong>
-                {gsttotal/2}
-                <br/>
-                <strong>SGST : </strong>
-                {gsttotal/2}
-              </span>)} */}
-              <span className="mx-4">
-                <strong>CGST : </strong>
-                {gsttotal/2}
-                <br/>
-                <strong>SGST : </strong>
-                {gsttotal/2}
-              </span>
-             <button
-                disabled={total===0 || bill.paymentmode==="Cash"}
-                type="submit"
-                className="btn btn-primary mb-3"
-                onClick={handleClickPayment}
-              >
-                Pay Now
-              </button>
+              <div className="col-sm mb-3 d-flex justify-content-start my-4">
+                <button
+                  type="submit"
+                  className="btn btn-primary mb-3"
+                  onClick={CalculateTotal}
+                >
+                  Calculate Total
+                </button>
+                <span className="mx-4">
+                  <strong>The Total is : </strong>
+                  {total}
+                </span>
+                {/* {customer.state!=="Haryana" & customer.entity==="Company"?
+                (<span className="mx-4">
+                  <strong>IGST : </strong>
+                  {gsttotal}
+                  </span>):(<span className="mx-4">
+                  <strong>CGST : </strong>
+                  {gsttotal/2}
+                  <br/>
+                  <strong>SGST : </strong>
+                  {gsttotal/2}
+                </span>)} */}
+                <span className="mx-4">
+                  <strong>CGST : </strong>
+                  {gsttotal/2}
+                  <br/>
+                  <strong>SGST : </strong>
+                  {gsttotal/2}
+                </span>
+                <button
+                  disabled={total===0 || bill.paymentmode==="Cash"}
+                  type="submit"
+                  className="btn btn-primary mb-3"
+                  onClick={handleClickPayment}
+                >
+                  Pay Now
+                </button>
+              </div>
             </div>
             <button
               disabled={total===0}
               type="submit"
               className="btn btn-primary"
               onClick={handleClick}
+              ref={execute}
             >
               Create Bill
             </button>
@@ -670,7 +674,7 @@ export default function Addbill(props) {
           <Billlist showAlert={props.showAlert} />
         </div> */}
       </div>
-      <Modal show={show}>
+      <Modal show={show} backdrop="static">
 
         <Modal.Header>
 
@@ -680,13 +684,20 @@ export default function Addbill(props) {
 
         <Modal.Body>
 
-          <ul className="list-group">
+          {txndata.RESPMSG==="Txn Success"?(<ul className="list-group mx-3 bg-success text-white">
             <li>Transaction Status : {txndata.RESPMSG}</li>
             <li>Payment Mode : {txndata.PAYMENTMODE}</li>
             <li>Bill Number : {txndata.ORDERID}</li>
             <li>Amount : {txndata.TXNAMOUNT}</li>
             <li>Date : {txndata.TXNDATE}</li>
-          </ul>
+          </ul>):
+          (<ul className="list-group mx-3 bg-danger text-white">
+            <li>Transaction Status : {txndata.RESPMSG}</li>
+            <li>Payment Mode : {txndata.PAYMENTMODE}</li>
+            <li>Bill Number : {txndata.ORDERID}</li>
+            <li>Amount : {txndata.TXNAMOUNT}</li>
+            <li>Date : {txndata.TXNDATE}</li>
+          </ul>)}
 
         </Modal.Body>
 

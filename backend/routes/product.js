@@ -72,6 +72,7 @@ router.post(
         sku: req.body.sku,
         barcode: req.body.barcode,
         price: req.body.price,
+        market_price: req.body.market_price,
         pname: req.body.pname,
         shortname: req.body.shortname,
         gstrate: req.body.gstrate
@@ -137,6 +138,10 @@ router.put("/edit/:id", async (req, res) => {
 
     if (req.body.price) {
       newprod.price = req.body.price;
+    }
+
+    if (req.body.market_price) {
+      newprod.market_price = req.body.market_price;
     }
 
     if (req.body.pname) {
@@ -225,3 +230,24 @@ router.post("/addmultiple",async(req, res)=>{
 });
 
 module.exports = router;
+
+//route 6: delete multiple entriesx`
+router.put("/deletemultiple",async(req, res)=>{
+  try{
+    const removed = await Product.updateMany({"_id":req.body} ,{$set: {deleted:true} }, {new:true} );
+    res.json(removed);
+  }catch(err){
+    console.log(err.message);
+    res.status(500).send("Internal Server Error");
+  }
+})
+
+router.delete("/deleteall", async (req, res)=>{
+  try{
+    let found = await Product.deleteMany({category : undefined});
+    res.json({found});
+  } catch (error){
+    console.error(error.message);
+    res.status(500).send("Internal Server Error");
+  }
+})

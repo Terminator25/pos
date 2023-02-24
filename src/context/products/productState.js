@@ -50,7 +50,7 @@ const ProductState = (props)=>{
 
       // Add a product
 
-  const addProduct = async (category,sku,barcode,price,pname,shortname, gstrate)=>{
+  const addProduct = async (category,sku,barcode,price,market_price,pname,shortname, gstrate)=>{
 
     const response = await fetch(`${host}/api/product/add`, {
       method: 'POST',
@@ -58,7 +58,7 @@ const ProductState = (props)=>{
         'Content-Type': 'application/json',
         'auth-token': localStorage.getItem('token')
       },
-      body: JSON.stringify({category,sku,barcode,price,pname,shortname, gstrate})
+      body: JSON.stringify({category,sku,barcode,price,market_price,pname,shortname, gstrate})
     });
     const json  = await response.json();
     setProducts(products.concat(json))
@@ -66,7 +66,7 @@ const ProductState = (props)=>{
 
   
   // Edit a product
-  const editProduct = async (id,category,sku,barcode,price,pname,shortname, gstrate)=>{
+  const editProduct = async (id,category,sku,barcode,price,market_price,pname,shortname, gstrate)=>{
 
     const response = await fetch(`${host}/api/product/edit/${id}`, {
       method: 'PUT',
@@ -74,7 +74,7 @@ const ProductState = (props)=>{
         'Content-Type': 'application/json',
         'auth-token': localStorage.getItem('token')
       },
-      body: JSON.stringify({id,category,sku,barcode,price,pname,shortname, gstrate})
+      body: JSON.stringify({id,category,sku,barcode,price,market_price,pname,shortname, gstrate})
     });
     const json  = response.json();
     console.log(json);
@@ -89,6 +89,7 @@ const ProductState = (props)=>{
         newproduct[index].sku = sku;
         newproduct[index].barcode = barcode;
         newproduct[index].price = price;
+        newproduct[index].market_price = market_price;
         newproduct[index].pname = pname;
         newproduct[index].shortname = shortname;
         newproduct[index].gstrate = gstrate;
@@ -151,9 +152,23 @@ const ProductState = (props)=>{
     .catch(err=>{console.log(err, 'err')})
   }
 
+  const deletemultiple = (selectedIds) =>{
+    const option = {
+      method: 'PUT', headers:{
+        'Content-Type':'application/json',
+        'auth-token': localStorage.getItem('token')
+      },
+      data: JSON.stringify(selectedIds),
+      url:`${host}/api/product/deletemultiple`
+    };
+    axios(option).then((e)=>{
+      getProducts();
+    })
+    .catch(err=>{console.log(err,'err')})
+  }
     
     return (
-        <ProductContext.Provider value={{products, setProducts, categories, addProduct, getProducts, getCategory, editProduct, deleteProduct, addmultiple}}>
+        <ProductContext.Provider value={{products, setProducts, categories, addProduct, getProducts, getCategory, editProduct, deleteProduct, addmultiple, deletemultiple}}>
             {props.children}
         </ProductContext.Provider>
     )

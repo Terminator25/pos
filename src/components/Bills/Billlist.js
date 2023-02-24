@@ -222,7 +222,7 @@
 
         <Modal show={show} onHide={handleClose}>
           <Modal.Header closeButton>
-            <Modal.Title>Edit Bill No. : {bill.billnumber}</Modal.Title>
+            <Modal.Title>Edit Bill No : {bill.billnumber}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <form className="my-3" onSubmit={handleSubmit}>

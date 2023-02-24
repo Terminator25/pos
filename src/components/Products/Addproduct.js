@@ -12,6 +12,7 @@ export default function Addproduct(props) {
     sku: "",
     barcode: "",
     price: "",
+    market_price: "",
     pname: "",
     shortname: "",
     gstrate:""
@@ -22,24 +23,51 @@ export default function Addproduct(props) {
 
   useEffect(() => {
     getProducts();
-    // eslint-disable-next-line
     getCategory();
-    // eslint-disable-next-line
-  }, []);
+  },//eslint-disable-next-line
+   []);
+  
+
   const handleParse = (e) =>{
     Papa.parse(e.target.files[0],{
       header:true,
       dynamicTyping:true,
       skipEmptyLines: true,
       complete:results=> {
-        // console.log("Parsed Results",results);
-        setParsedData(results.data)}
+        setParsedData(results.data);
+        // for(let i=0; i < parsedData.length;i++)
+        // {
+        //   categories.map((category)=>{return(category.name===parsedData[i].category)?setParsedData({...parsedData, parsedData[i]:category._id})})
+        // }
+      }
     });
   };
 
-  // console.log('new entries', parsedData);
+  console.log(parsedData, 'bigfile');
+
+  useEffect(()=>{
+    for(let i=0; i<parsedData.length; i++)
+    {
+      for(let j=0; j<products.length; j++)
+      {
+        if(products[j].pname===parsedData[i].pname)
+        {
+          let new_data=parsedData.filter((data)=>data.pname!==parsedData[i].pname);
+          setParsedData(new_data);
+          break;
+        }
+      }
+    }
+  },//eslint-disable-next-line
+  [parsedData]);
 
   const handleMultiple =(e)=>{
+    parsedData.map((data)=>{
+      return(categories.map((categor)=>{
+        return(categor.name===data.category)?(data.category=categor._id):null;
+      }));
+    })
+
     addmultiple(parsedData);
     setParsedData([]);
   }
@@ -76,6 +104,7 @@ export default function Addproduct(props) {
         product.sku,
         product.barcode,
         product.price,
+        product.market_price,
         product.pname,
         product.shortname,
         product.gstrate
@@ -86,6 +115,7 @@ export default function Addproduct(props) {
         sku: "",
         barcode: "",
         price: "",
+        market_price: "",
         pname: "",
         shortname: "",
         gstrate: ""
@@ -147,7 +177,7 @@ export default function Addproduct(props) {
               />
             </div>
 
-            <div className="col-sm-4 mb-2">
+            <div className="col-sm-2 mb-2">
               <label htmlFor="price" className="form-label">
                 Price
               </label>
@@ -162,9 +192,24 @@ export default function Addproduct(props) {
                 required
               />
             </div>
-          </div>  
+
+            <div className="col-sm-2 mb-2">
+              <label htmlFor="market_price" className="form-label">
+                MRP
+              </label>
+              <input 
+                type="number"
+                className="form-control"
+                id="market_price"
+                name="market_price"
+                onChange={onChange}
+                value={product.market_price}  
+              />
+            </div>
+          </div>
+
           <div className="row">
-            <div className="col-sm-4 mb-2">
+            <div className="col-sm-3 mb-2">
               <label htmlFor="shortname" className="form-label">
                 Short Name
               </label>
@@ -179,7 +224,7 @@ export default function Addproduct(props) {
               />
             </div>
 
-            <div className="col-sm-4 mb-2">
+            <div className="col-sm-3 mb-2">
               <label htmlFor="sku" className="form-label">
                 SKU
               </label>
@@ -194,7 +239,7 @@ export default function Addproduct(props) {
               />
             </div>
 
-            <div className="col-sm-4 mb-2">
+            <div className="col-sm-3 mb-2">
               <label htmlFor="barcode" className="form-label">
                 Barcode
               </label>
@@ -209,7 +254,7 @@ export default function Addproduct(props) {
               />
             </div>
 
-            <div className="col-sm-4 mb-2">
+            <div className="col-sm-3 mb-2">
               <label htmlFor="gstrate" className="form-label">
                 GST On Product
               </label>
@@ -244,7 +289,7 @@ export default function Addproduct(props) {
           name="import"
           onChange={handleParse}
           />
-          <button type="submit" className="btn btn-primary" onClick={handleMultiple}>Import Data</button>
+          <button type="submit" className="btn btn-primary my-3" onClick={handleMultiple}>Import Data</button>
         </form>
       </div>
     </div>
