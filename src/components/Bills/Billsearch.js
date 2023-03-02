@@ -121,14 +121,16 @@ export default function Billsearch(props) {
                 <div className="col-sm-4">
                     <label>Date of Bill</label>
                     <br/>
-                    <button className="bg-white rounded text-black my-1" onClick={onClickDate}>Open Calendar</button>
-                    {selectDate ?(<DateRange
-                        editableDateInputs={true}
-                        onChange={setRange}
-                        moveRangeOnFirstSelection={false}
-                        ranges={dates}
-                        dateDisplayFormat="dd-MM-yyyy"
-                    />): null}
+                    <form action="submit">
+                        <button className="bg-white rounded text-black my-1" onClick={onClickDate}>Open Calendar</button>
+                        {selectDate ?(<DateRange
+                            editableDateInputs={true}
+                            onChange={setRange}
+                            moveRangeOnFirstSelection={false}
+                            ranges={dates}
+                            dateDisplayFormat="dd-MM-yyyy"
+                        />): null}
+                    </form>
                 </div>
                 {/* <div className="col-sm-4">
                     <label>Date of Bill</label>

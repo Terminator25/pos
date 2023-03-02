@@ -165,6 +165,7 @@ router.post("/find", async(req, res)=>{
       else if(req.body.name!==""){condition=2}
       // (req.body.time!=="")
       else{condition=3};
+      if (req.body.name!=="" && range[0].endDate!==null){condition=4}
 
       switch(condition){
         case 1:
@@ -181,6 +182,9 @@ router.post("/find", async(req, res)=>{
         case 3:
           search = await Bill.find({time:{$gte:new Date(start), $lt:new Date(end)}, deleted: false});
           break;
+
+        case 4:
+          search = await Bill.find({$and:[{customer:req.body.name},{time:{$gte:new Date(start), $lt:new Date(end)}}], deleted: false});
 
       }
 

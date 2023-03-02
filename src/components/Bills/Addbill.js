@@ -3,6 +3,7 @@ import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import BillContext from "../../context/bills/BillContext";
 import PaymentContext from "../../context/payment/PaymentContext";
+import { Card, Row, Col } from "react-bootstrap";
 // import Billlist from "./Billlist"
 import { v1 as uuidv1 } from "uuid";
 
@@ -135,6 +136,11 @@ export default function Addbill(props) {
         : "";
     });
   }, [item.pname, productlist]);
+
+  const clickCard = (e)=>{
+    console.log(e.target.id);
+    setItem((prevState) => ({ ...prevState, pname: e.target.id }));
+  }
 
   //Populate customer details
   // useEffect(() => {
@@ -387,7 +393,7 @@ export default function Addbill(props) {
 
   return (
     <div>
-      <div>
+      <div className="billing">
         <div className="container my-3">
           <h2>Billing</h2>
           <form className="my-3">
@@ -670,9 +676,24 @@ export default function Addbill(props) {
             </button>
           </form>
         </div>
-        {/* <div className="row">      
-          <Billlist showAlert={props.showAlert} />
-        </div> */}
+        <div className="quickAccess">
+          <Row md={4} className="g-4">
+            {productlist.map((product)=>{
+              return(
+              <>
+              {products.includes(product.pname)?null:
+              (<Col>
+                <Card style={{width:"20rem",height:"10rem"}}>
+                  <Card.Body>
+                    <Card.Title   onClick={clickCard} id={product.pname}>{product.pname}</Card.Title>
+                    <Card.Text>Price : {product.price}<br/>MRP : {product.market_price}</Card.Text>
+                  </Card.Body>
+                </Card>
+              </Col>)}
+              </>
+            )})}
+          </Row>
+        </div>
       </div>
       <Modal show={show} backdrop="static">
 

@@ -10,7 +10,7 @@ const PdfDownloader = ({rootElementId, DownloadFileName}) => {
                 const imgData = canvas.toDataURL('image/png');
                 let position=0;
                 const imgWidth= 3;
-                const pageHeight= 9;
+                const pageHeight= 3;
                 let imgHeight=canvas.height * imgWidth/canvas.width;
                 let heightLeft=imgHeight; 
                 // const pdf = new jsPDF({orientation:'p', unit:'in', format:[9, 6.5]});
