@@ -43,7 +43,11 @@ const productSchema = new Schema({
     deleted:{
         type: Boolean,
         default:false
-    }
+    },
+
+    quantity:{
+        type : Number
+    }    
 
   });
 

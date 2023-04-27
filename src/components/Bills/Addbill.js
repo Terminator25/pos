@@ -3,7 +3,9 @@ import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import BillContext from "../../context/bills/BillContext";
 import PaymentContext from "../../context/payment/PaymentContext";
+import CategoryContext from "../../context/categories/CategoryContext";
 import { Card, Row, Col } from "react-bootstrap";
+
 // import Billlist from "./Billlist"
 import { v1 as uuidv1 } from "uuid";
 
@@ -44,11 +46,15 @@ export default function Addbill(props) {
     bills,
     getBills,
     getCustomers,
+    
     // addCustomer,
   } = context;
 
   const paycontext = useContext(PaymentContext);
   const { tstoken, initialize, update } = paycontext;
+
+  const categorycontext = useContext(CategoryContext);
+  const { getCategory, categories } = categorycontext;
 
   // let uuid = BigInt(uuidv1().substring(0, 8));
 
@@ -70,6 +76,7 @@ export default function Addbill(props) {
     getProducts();
     getBills();
     getCustomers();
+    getCategory();
     //eslint-disable-next-line
   }, []);
 
@@ -77,7 +84,7 @@ export default function Addbill(props) {
   // let initialcust = { name: "", gst: "", address: "", phno: "", email: "", state: "", pin: "", entity: "" };
 
   //Initial values stored in item state
-  let initialitem = { pname: "", price: "", quantity: 1, gstrate:"" };
+  let initialitem = { pname: "", price: "", quantity: 0, gstrate:"" };
 
   //Change value of variables in state
   const onChange = (e) => {
@@ -113,6 +120,13 @@ export default function Addbill(props) {
   //State for transaction data
   const [txndata, setTxndata] = useState({});
 
+  //State for filtering products category wise
+  const [category, setCategory] = useState("all");
+
+  const FilterCategory = (element) => {
+    setCategory(element.target.id);
+  }
+
   const Increment = (element) => {
     let index = element;
     let newArr = [...products];
@@ -132,7 +146,7 @@ export default function Addbill(props) {
     productlist.map((product) => {
       // if (product.pname === item.pname)
       return product.pname === item.pname
-        ? setItem((prevState) => ({ ...prevState, price: product.price, gstrate: product.gstrate }))
+        ? setItem((prevState) => ({ ...prevState, price: product.price, gstrate: product.gstrate, quantity: 1 }))
         : "";
     });
   }, [item.pname, productlist]);
@@ -207,7 +221,7 @@ export default function Addbill(props) {
   };
 
   useEffect(() => {
-    if (item.pname !== "" && item.price !== "") {
+    if (item.pname !== "" && item.price !== "" && item.quantity!==0) {
       // && item.quantity!=="")
       handleClickProduct();
     }
@@ -292,7 +306,7 @@ export default function Addbill(props) {
     // setBill({ ...bill, [billnumber]: uuidv1().substring(0, 8) });
 
   };
-
+  console.log(tstoken, "paytm check");
   const handleClickPayment = async (event) => {
     event.preventDefault();
     console.log(tstoken);
@@ -676,23 +690,188 @@ export default function Addbill(props) {
             </button>
           </form>
         </div>
-        <div className="quickAccess">
-          <Row md={4} className="g-4">
-            {productlist.map((product)=>{
-              return(
-              <>
-              {products.includes(product.pname)?null:
-              (<Col>
-                <Card style={{width:"20rem",height:"10rem"}}>
-                  <Card.Body>
-                    <Card.Title   onClick={clickCard} id={product.pname}>{product.pname}</Card.Title>
-                    <Card.Text>Price : {product.price}<br/>MRP : {product.market_price}</Card.Text>
-                  </Card.Body>
-                </Card>
-              </Col>)}
-              </>
-            )})}
-          </Row>
+        <div className="quickAccess pt-4">
+          <h2 className="p-2">Add Products to Cart</h2>
+          <tr>
+            <th className="p-1">Categories</th>
+            <th className="p-1">Products</th>
+            <th className="p-1">Billing</th>
+          </tr>        
+          <tr>
+            <td style={{width:"13rem"}}>
+            <div className="container">
+            <nav>
+              <div className="nav nav-pills flex-column" id="nav-pill" role="tablist" style={{width:"12rem",height:"40rem"}}>
+                <button className="nav-link active" style={{textAlign:"left"}} data-bs-toggle="tab" type="button" role="tab" id="all" aria-selected="true" onClick={FilterCategory}>All</button>
+                {categories.map((category)=>{
+                  return(
+                    <button className="nav-link" style={{textAlign:"left"}} data-bs-toggle="tab" type="button" role="tab" id={category._id} aria-selected="false" onClick={FilterCategory}>{category.name}</button>
+                  );
+                })}
+              </div>
+            </nav>
+            </div>
+            </td>
+
+            <td style={{width:"50rem"}}> 
+            <div className="container my-3">
+            {category!=="all"?(  
+            <Row xs={3} className="g-2">
+              {productlist.filter((product)=>product.category===category).map((product)=>{
+                return(
+                <>
+                {hide.includes(product.pname)?null:
+                (<Col>
+                  <Card style={{width:"14rem",height:"9rem", fontSize:"1rem"}}>
+                    <Card.Body>
+                      <Card.Title style={{fontSize:"1rem"}} onClick={clickCard} id={product.pname}>{product.pname}</Card.Title>
+                      <Card.Text style={{fontSize:"0.8rem"}}>Our Price : {product.price}<br/>MRP : {product.market_price}</Card.Text>
+                    </Card.Body>
+                  </Card>
+                </Col>)}
+                </>
+              )})}
+            </Row>):null}
+            
+            {category==="all"?(
+            <Row xs={3} className="g-2">
+              {productlist.map((product)=>{
+                return(
+                <>
+                {hide.includes(product.pname)?null:
+                (<Col>
+                  <Card style={{width:"14rem",height:"9rem", fontSize:"1rem"}}>
+                    <Card.Body>
+                      <Card.Title style={{fontSize:"1rem"}} onClick={clickCard} id={product.pname}>{product.pname}</Card.Title>
+                      <Card.Text style={{fontSize:"0.8rem"}}>Our Price : {product.price}<br/>MRP : {product.market_price}</Card.Text>
+                    </Card.Body>
+                  </Card>
+                </Col>)}
+                </>
+              )})}
+            </Row>):null}
+            </div>
+            </td> 
+            <td style={{width:"10rem"}}>
+              <div className="container">
+              Items in basket:
+              <ul className="list-group">
+                {products.map((product, index) => {
+                  return (
+                    <li
+                      className="list-group-item"
+                      key={product.pname} value={product.pname}
+                      style={{width : "15rem", height : "4rem"}}
+                    >
+                      <table>
+                        <tr>
+                          <td style={{width:"8rem"}}>
+                            <span className="flex-grow-1" style={{fontSize:"0.8rem"}}>{(product.pname).substring(0,15)}<br />Price:{product.price}</span>
+                          </td>
+                          <td>
+                          <span className="badge bg-primary rounded d-flex align-items-center" style={{width:"3.5rem", height:"1.5rem"}}>
+                            <button
+                              type="button"
+                              className="badge bg-primary rounded text-center p-1"
+                              style={{width:"1rem", height:"1rem", verticalAlign:"middle"}}
+                              onClick={() => Decrement(index)}
+                              disabled={product.quantity < 2}
+                            >
+                              -
+                            </button>
+                            <span className="mx-1" style={{fontSize:"0.5rem"}}>{product.quantity}</span>
+                            <button
+                              type="button"
+                              className="badge bg-primary rounded text-center p-1"
+                              style={{width:"1rem", height:"1rem", verticalAlign:"middle"}}
+                              onClick={() => Increment(index)}
+                            >
+                              +
+                            </button>
+                          </span>
+                          </td>
+                          <td>
+                            <button
+                              className="btn bg-danger rounded-pill p-1"
+                              style={{width:"1.5rem", height:"1.5rem", fontSize:"0.8rem"}}
+                              onClick={handleRemoveItem}
+                              value={product.pname}
+                            >
+                              X
+                            </button>
+                          </td>
+                        </tr>
+                      </table>
+                      {/* <span className="badge bg-primary rounded mx-1">
+                        Price:{product.price}{" "}
+                      </span> */}
+                      
+                    </li>
+                  );
+                })}
+              </ul>
+              <span><strong>Amount : {cost.toFixed(2)}</strong></span>
+              <br/>
+              <span><strong>Discount : {bill.discount}</strong></span>
+              <br/>
+              <span>
+                <strong>CGST : </strong>
+                {gsttotal/2}
+                <br/>
+                <strong>SGST : </strong>
+                {gsttotal/2}
+              </span>
+              <br />
+              <button
+                  type="submit"
+                  className="btn btn-primary mb-3"
+                  onClick={CalculateTotal}
+                >
+                  Calculate Total
+              </button>
+              <br />
+              <span>
+                  <strong>Total : </strong>
+                  {total}
+              </span>
+              <br />
+              <span>
+              <label>Payment Mode</label>
+              <select
+              id='paymentmode'
+              name='paymentmode'
+              className="form-select"
+              aria-label="Payment Mode"
+              onChange={onChange}
+              value={bill.paymentmode}
+              >
+                <option key="1">Cash</option>
+                <option key="2">UPI/Wallet</option>
+                <option key="3">Credit/Debit Card</option>
+                <option key="4">Net Banking</option>
+              </select>
+              </span>
+              <br />
+              <button
+                disabled={total===0 || bill.paymentmode==="Cash"}
+                type="submit"
+                className="btn btn-primary mb-3"
+                onClick={handleClickPayment}
+                >
+                Pay Now
+              </button>
+              <br />
+              <button
+              disabled={total===0}
+              type="submit"
+              className="btn btn-primary"
+              onClick={handleClick}
+              >
+              Create Bill
+              </button>
+              </div>
+            </td>
+          </tr>
         </div>
       </div>
       <Modal show={show} backdrop="static">

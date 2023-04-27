@@ -1,4 +1,5 @@
 const express = require("express");
+const Bill = require("../models/Bill");
 const Product = require("../models/Product");
 const Category = require("../models/Category");
 const { ObjectId } = require("mongodb");
@@ -17,6 +18,17 @@ router.get("/view", async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 });
+
+router.get("/viewdeleted", async(req, res)=>{
+  try {
+    const products = await Product.find({deleted:true})
+    res.json(products); 
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send("Internal Server Error")
+  }
+})
+
 
 // ROUTE2: add product from : POST "/api/product/add"
 
@@ -75,7 +87,8 @@ router.post(
         market_price: req.body.market_price,
         pname: req.body.pname,
         shortname: req.body.shortname,
-        gstrate: req.body.gstrate
+        gstrate: req.body.gstrate,
+        quantity: req.body.quantity
       });
 
       const savedproduct = await product.save();
@@ -218,6 +231,24 @@ router.put("/delete/:id", async (req, res)=>{
   }
 })
 
+router.put("/restore/:id", async (req, res)=>{
+  try{
+    try{
+      let found = await Product.findById(ObjectId(req.params.id));
+      if(!found){
+        return req.status(404).send("Not Found");
+      }
+    } catch(error){
+      return res.status(400).json({error : "Wrong ID"});
+    }
+    let found = await Product.findByIdAndUpdate(req.params.id, {$set: {deleted:false}},{new:true});
+    res.json({found});
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send("Internal Server Error");
+  }
+})
+
 //route 5: insert additional objects through array of objects
 router.post("/addmultiple",async(req, res)=>{
   try{
@@ -242,11 +273,83 @@ router.put("/deletemultiple",async(req, res)=>{
   }
 })
 
-router.delete("/deleteall", async (req, res)=>{
+//route 7: update inventory of product
+router.put("/inventory/:id", async(req, res)=>{
   try{
-    let found = await Product.deleteMany({category : undefined});
+    try {
+      let found = await Product.findById(ObjectId(req.params.id));
+      if(!found){
+        return req.status(404).send("Not Found");
+      }
+    } catch (error) {
+      return res.status(400).json({error : "Wrong ID"});
+    }
+
+    const value=req.body.quantity;
+
+    let found = await Product.findByIdAndUpdate(req.params.id, {$set: {quantity:value}},{new:true});
+    res.json({found});
+  }catch(err){
+    console.log(err.message);
+    res.status(500).send("Internal Server Error")
+  }
+})
+
+//route 8: search for a product
+router.post("/search", async(req, res)=>{
+  
+  try{
+    let search = await Product.findOne({pname:req.body.pname, deleted:false})
+    res.json(search);
+  } catch(error) {
+    console.error(error.message);
+    res.status(500).send("Internal Server Error")
+  }
+})
+
+router.put("/deleteall", async (req, res)=>{
+  try{
+    let found = await Product.updateMany({quantity : 100});
     res.json({found});
   } catch (error){
+    console.error(error.message);
+    res.status(500).send("Internal Server Error");
+  }
+})
+
+router.put("/monthlyupdate", async (req,res)=>{
+  try{ 
+    const today = new Date();
+    const endOfMonth = new Date(today.getFullYear(), today.getMonth()+1, 1);
+    const beginningofMonth = new Date(today.getFullYear(), today.getMonth(), 1); 
+    let productarray = await Bill.find({time:{$gte:beginningofMonth, $lt:endOfMonth}},{"products":1, "_id":0});
+    let product_quantity_used={}
+    productarray.forEach(item=>item.products.forEach(product => 
+      {
+        if(product_quantity_used.hasOwnProperty(product.pname))
+          {product_quantity_used[product.pname] += product.quantity}
+        else 
+          {product_quantity_used[product.pname] = product.quantity} 
+      }))
+    let products= await Product.find({});
+    products.forEach(async product=>{
+    if (product_quantity_used.hasOwnProperty(product.pname))
+      {await Product.findByIdAndUpdate(product._id, {$set:{quantity:product.quantity-product_quantity_used[product.pname]}, new:true})}
+    })
+  } catch(error){
+    console.error(error.message);
+    res.status(500).send("Internal Server Error");
+  }
+})
+
+router.get("/test", async(req, res)=>{
+  try{
+    const today = new Date();
+    const endOfMonth = new Date(today.getFullYear(), today.getMonth()+1, 1);
+    const beginningofMonth = new Date(today.getFullYear(), today.getMonth(), 1); 
+    let productarray = await Bill.find({time:{$gte:beginningofMonth, $lt:endOfMonth}},{"products":1, "_id":0});
+    res.json(productarray);
+  }catch(error){
     console.error(error.message);
     res.status(500).send("Internal Server Error");
   }

@@ -14,6 +14,10 @@ const ProductState = (props)=>{
 
   const [products, setProducts] = useState(productsinitial);
 
+  const [deletedproducts, setDeleted] = useState([]);
+
+  const [productfound, setFound] = useState();
+
   // Get all products
 
   const getProducts = async ()=>{
@@ -31,26 +35,39 @@ const ProductState = (props)=>{
 
   }
 
-    // Get all categories
+  const getDeletedProducts = async ()=>{
 
-    const getCategory = async ()=>{
+    const response = await fetch(`${host}/api/product/viewdeleted`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'auth-token': localStorage.getItem('token')
+      }
+    });
+    const json = await response.json();
+    setDeleted(json)
+  }
 
-      const response = await fetch(`${host}/api/category/view`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'auth-token': localStorage.getItem('token')
-        }
-      });
-      const json  = await response.json();
-  
-      setCategories(json)
-  
-    }
+  // Get all categories
 
-      // Add a product
+  const getCategory = async ()=>{
 
-  const addProduct = async (category,sku,barcode,price,market_price,pname,shortname, gstrate)=>{
+    const response = await fetch(`${host}/api/category/view`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'auth-token': localStorage.getItem('token')
+      }
+    });
+    const json  = await response.json();
+
+    setCategories(json)
+
+  }
+
+    // Add a product
+
+  const addProduct = async (category,sku,barcode,price,market_price,pname,shortname, gstrate, quantity)=>{
 
     const response = await fetch(`${host}/api/product/add`, {
       method: 'POST',
@@ -58,7 +75,7 @@ const ProductState = (props)=>{
         'Content-Type': 'application/json',
         'auth-token': localStorage.getItem('token')
       },
-      body: JSON.stringify({category,sku,barcode,price,market_price,pname,shortname, gstrate})
+      body: JSON.stringify({category,sku,barcode,price,market_price,pname,shortname, gstrate, quantity})
     });
     const json  = await response.json();
     setProducts(products.concat(json))
@@ -138,6 +155,27 @@ const ProductState = (props)=>{
     })
   }
 
+  const restoreProduct = (id) => {
+    const option = {
+      method: 'PUT', headers: {
+        'Content-Type': 'application/json',
+        'auth-token': localStorage.getItem('token')
+      },
+      url: `${host}/api/product/restore/${id}`
+    };
+    axios(option)
+    .then((e) => {
+      console.log(e,'e112');
+      if (e?.data?.found?._id) {
+        getProducts();
+        getDeletedProducts();
+      }
+    })
+    .catch((err) => {
+      console.log(err,'err');
+    })
+  }
+
   const addmultiple = (parseddata) =>{
     const option = {
       method: 'POST', headers:{
@@ -166,9 +204,50 @@ const ProductState = (props)=>{
     })
     .catch(err=>{console.log(err,'err')})
   }
-    
+  
+  const updateinventory = (id, quantity) =>{
+    const option = {
+      method: 'PUT', headers:{
+        'Content-Type':'application/json',
+        'auth-token': localStorage.getItem('token')
+      },
+      data: JSON.stringify({quantity}),
+      url:`${host}/api/product/inventory/${id}`
+    };
+    axios(option).then((e)=>{
+      getProducts();
+    })
+    .catch(err=>{console.log(err,'err');})
+  }
+
+  const searchProduct = (pname) =>{
+    const option = {
+      method: 'POST', headers:{
+        'Content-Type':'application/json',
+        'auth-token':localStorage.getItem('token')
+      },
+      data: JSON.stringify({pname}),
+      url:`${host}/api/product/search`
+    };
+    axios(option).then((e)=>{
+      setFound(e.data);
+    })
+    .catch(err=>{console.log(err,'err');})
+  }
+
+  const getMonthlyUpdate = () => {
+    const option = {
+      method:'PUT', headers:{
+        'Content-Type':'application/json',
+        'auth-token':localStorage.getItem('token')
+      },
+      url:`${host}/api/product/monthlyupdate`
+    };
+    axios(option).catch(err=>{console.log(err,'err');})
+  }
+
     return (
-        <ProductContext.Provider value={{products, setProducts, categories, addProduct, getProducts, getCategory, editProduct, deleteProduct, addmultiple, deletemultiple}}>
+        <ProductContext.Provider value={{products, setProducts, deletedproducts, getDeletedProducts, categories, addProduct, getProducts, getCategory, editProduct, deleteProduct, restoreProduct, addmultiple, updateinventory, deletemultiple, productfound, searchProduct, getMonthlyUpdate}}>
             {props.children}
         </ProductContext.Provider>
     )

@@ -8,7 +8,7 @@ import Tooltip from 'react-bootstrap/Tooltip';
 export default function Productitem(props) {
 
   const context = useContext(ProductContext);
-  const { product, updateProduct, handleSelect, selectedIds } = props;
+  const { product, updateProduct, handleSelect, selectedIds, updateInventory } = props;
   const { deleteProduct} = context;
 
   const selectCard = (e)=>{
@@ -66,6 +66,7 @@ export default function Productitem(props) {
     <li className="list-group-item my-2 d-flex justify-content-between">
         <div className="position-relative">
           <OverlayTrigger overlay={(selectedIds.length>9?(<Tooltip id="tooltip-disabled">Atmost 10 items can be deleted at a time</Tooltip>):<span></span>)}>
+          {/* eslint-disable-next-line  */}
           <a href="#" 
           disabled={use} 
           className="stretched-link text-decoration-none text-black" onClick={selectCard}><h5 className="card-title">{product.pname}</h5></a>
@@ -90,6 +91,7 @@ export default function Productitem(props) {
             
             <i className="fa fa-edit my-3" onClick={()=>{updateProduct(product)}}></i>
             <i className="fa fa-trash my-3 mx-2" aria-hidden="true" onClick={handleClick}></i>
+            <i className="fa fa-folder-open my-3" aria-hidden="true" onClick={()=>{updateInventory(product)}}></i>
         </div>
         {/* <p className="card-text mx-3 position-relative">Price: Rs. {product.price}
             {product.category!==undefined?(<><br/>Category: {

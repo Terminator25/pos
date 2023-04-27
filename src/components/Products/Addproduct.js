@@ -15,7 +15,8 @@ export default function Addproduct(props) {
     market_price: "",
     pname: "",
     shortname: "",
-    gstrate:""
+    gstrate:"",
+    quantity: 0
   });
 
   // const [selectedFile, setSelectedFile] = useState(null);
@@ -42,8 +43,6 @@ export default function Addproduct(props) {
       }
     });
   };
-
-  console.log(parsedData, 'bigfile');
 
   useEffect(()=>{
     for(let i=0; i<parsedData.length; i++)
@@ -107,7 +106,8 @@ export default function Addproduct(props) {
         product.market_price,
         product.pname,
         product.shortname,
-        product.gstrate
+        product.gstrate,
+        product.quantity
       );
      // console.log(product);
       setProduct({
@@ -118,7 +118,8 @@ export default function Addproduct(props) {
         market_price: "",
         pname: "",
         shortname: "",
-        gstrate: ""
+        gstrate: "",
+        quantity:0
       });
      // console.log(product);
       props.showAlert("Product Added!", "success");
@@ -162,7 +163,7 @@ export default function Addproduct(props) {
             }
           </div>
           <div className="row">
-            <div className="col-sm-8 mb-2">
+            <div className="col-sm-6 mb-2">
               <label htmlFor="name" className="form-label">
                 Product Name
               </label>
@@ -204,6 +205,20 @@ export default function Addproduct(props) {
                 name="market_price"
                 onChange={onChange}
                 value={product.market_price}  
+              />
+            </div>
+            
+            <div className="col-sm-2 mb-2">
+              <label htmlFor="quantity" className="form-label">
+                Quantity
+              </label>
+              <input
+                type="number"
+                className="form-control"
+                id="quantity"
+                name="quantity"
+                onChange={onChange}
+                value={product.quantity}  
               />
             </div>
           </div>

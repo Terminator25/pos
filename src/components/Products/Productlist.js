@@ -3,15 +3,23 @@ import ProductContext from "../../context/products/ProductContext";
 import Productitem from "./Productitem";
 // import ListProductItem from "./Listproductitem";
 import ReactPaginate from "react-paginate";
+import { Modal, Button } from "react-bootstrap";
 
 export default function Productlist(props) {
   const context = useContext(ProductContext);
-  const { products, getProducts, editProduct, getCategory, categories, deletemultiple } =
+  const { products, getProducts, editProduct, getCategory, categories, deletemultiple, restoreProduct, updateinventory, productfound, searchProduct, getMonthlyUpdate, getDeletedProducts, deletedproducts } =
     context;
 
   useEffect(() => {
     getCategory();
     getProducts();
+
+    const today= new Date();
+    const endOfMonth = new Date(today.getFullYear(), today.getMonth()+1, 0)
+
+    if(today.getTime()===endOfMonth.getTime())
+    {getMonthlyUpdate();}
+
     // eslint-disable-next-line
   }, []);
 
@@ -27,6 +35,31 @@ export default function Productlist(props) {
     egstrate: ""
   });
 
+  const [inventory, setInventory] = useState(
+    {
+      id:"",
+      quantity:"",
+      pname:""
+    }
+  );
+
+  const [search, setSearch] = useState();
+
+  const [show, setShow] = useState(false);
+
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
+
+  const [showdelete, setShowDeleted] = useState(false);
+
+  const handleCloseDelete = () => setShowDeleted(false);
+  const handleShowDelete = () => setShowDeleted(true);
+
+  const handleHistory = () => {
+    getDeletedProducts();
+    handleShowDelete();
+    console.log(deletedproducts, "Deleted products from frontend");
+  }
 
   const [currentPage, setCurrentPage] = useState(0);
 
@@ -44,6 +77,23 @@ export default function Productlist(props) {
       egstrate: prod.gstrate
     });
   };
+
+  const updateInventory = (prod) => {
+    setInventory({
+      id: prod._id,
+      quantity: prod.quantity,
+      pname: prod.pname
+    });
+    handleShow();
+  };
+
+  const onInventoryChange = (e) => {
+    setInventory({ ...inventory, [e.target.name]: e.target.value });
+  };
+
+  const onSearchChange=(e)=>{
+    setSearch(e.target.value)
+  }
 
   const ref = useRef(null);
   const refClose = useRef(null);
@@ -98,6 +148,17 @@ export default function Productlist(props) {
       refClose.current.click();
 
   };
+  
+  const handleInventory=(e)=>{
+    e.preventDefault();
+
+    updateinventory(
+      inventory.id,
+      inventory.quantity
+      );
+
+    props.showAlert("Product Updated!", "success");
+  }
 
   const onChange = (e) => {
     setProduct({ ...product, [e.target.name]: e.target.value });
@@ -157,6 +218,7 @@ export default function Productlist(props) {
         key={product._id}
         selectedIds={selectedIds}
         updateProduct={updateProduct}
+        updateInventory={updateInventory}
         handleSelect={handleSelect}
         product={product}
         showAlert={props.showAlert}
@@ -318,8 +380,6 @@ export default function Productlist(props) {
                     name="egstrate"
                     value={product.egstrate}
                     onChange={onChange}
-                    minLength={3}
-                    required
                   />
                 </div>
 
@@ -334,8 +394,6 @@ export default function Productlist(props) {
                     name="eshortname"
                     value={product.eshortname}
                     onChange={onChange}
-                    minLength={3}
-                    required
                   />
                 </div>
 
@@ -369,26 +427,75 @@ export default function Productlist(props) {
         </div>
       </div>
 
-      {/* <div className="row my-3">
-        <h2>Saved Products</h2> <br />
-        <br />
-        <ul className="list-group">
-        {products.map((product) => {
-          return (
-            <ListProductItem
-              key={product._id}
-              updateProduct={updateProduct}
-              handleSelect={handleSelect}
-              product={product}
-              showAlert={props.showAlert}
-            />
-          );
-        })}
-        </ul>
-      </div> */}
+      <Modal show={show} onHide={handleClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>{inventory.pname}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+        <label htmlFor="quantity" className="form-label">
+          Inventory
+        </label>
+        <input 
+          type="number" 
+          className="form-control"
+          id="quantity"
+          name="quantity"
+          value={inventory.quantity}
+          onChange={onInventoryChange} 
+        />
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleClose}>
+            Close
+          </Button>
+          <Button variant="primary" onClick={handleInventory}>
+            Save Changes
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
-      <div className="row my-3">
-        <h1 className="my-3">Products</h1>      
+      <div className="row my-3 mx-1">
+        <h1 className="my-3">Products</h1> 
+        <span className="row border border-2 rounded">
+        <button className="btn btn-primary col-sm-1 my-3" onClick={()=>{searchProduct(search)}}>Search</button><input type="text"  onChange={onSearchChange} placeholder="Search for Products" id="search" className="form-select col mx-2 my-3" aria-label="Search for a Product" list="items"/>     
+        <datalist id="items">
+          {products.map((product)=>{
+            return(
+              <option key={product._id} id={product._id}>{product.pname}</option>
+            )            
+          })}
+        </datalist>
+        {/* <button className="btn btn-primary col-sm-2 my-3" onClick={()=>{searchProduct()}}>Clear Search</button> */}
+        {productfound!==undefined?
+        (<Productitem
+          key={productfound._id}
+          selectedIds={selectedIds}
+          updateProduct={updateProduct}
+          updateInventory={updateInventory}
+          handleSelect={handleSelect}
+          product={productfound}
+          showAlert={props.showAlert}
+        />):null}
+
+        <button onClick={handleHistory} className="btn btn-primary col-sm-2 my-3">Deleted Items</button>
+        </span>
+
+        <Modal show={showdelete} onHide={handleCloseDelete}>
+        <Modal.Header closeButton>
+          <Modal.Title>Deleted Items</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <ul className="list-group">
+        {deletedproducts.map(element=>{return(<li className="list-group-item mx-1 d-flex justify-content-between">{element.pname}<i className="fa fa-refresh" onClick={()=>{restoreProduct(element._id)}} aria-hidden="true" ></i></li>)})}
+        </ul>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="primary" onClick={handleCloseDelete}>
+            Close
+          </Button>
+        </Modal.Footer>
+        </Modal>
+
         {selectedIds.length>0?(<p><button className="badge bg-primary rounded mx-1" onClick={handlemultipledelete}>Delete Selected</button> <button className="badge bg-primary rounded mx-1" onClick={clearselectedids}>Clear Selected</button> <span className="mx-3">{selectedIds.length}</span></p>):null}
         <ul className="list-group" style={{width:"60rem"}}>
         {selectedProds.slice(offset, offset + PER_PAGE).map((product) =>{
@@ -398,6 +505,7 @@ export default function Productlist(props) {
               key={product._id}
               selectedIds={selectedIds}
               updateProduct={updateProduct}
+              updateInventory={updateInventory}
               handleSelect={handleSelect}
               product={product}
               showAlert={props.showAlert}

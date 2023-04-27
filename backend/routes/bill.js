@@ -1,9 +1,7 @@
 const express = require("express");
-const Bill = require("../models/bill");
-const Customer = require("../models/bill");
+const Bill = require("../models/Bill");
 const router = express.Router();
 const { ObjectId } = require("mongodb");
-const bill = require("../models/bill");
 
 
 // ROUTE1: get bills list from : GET "/api/bill/view"
