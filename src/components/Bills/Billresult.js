@@ -5,6 +5,8 @@ import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';  
+import moment from "moment";
+import { Offcanvas } from "react-bootstrap";
 
 export default function Billresult(props) {
     const context = useContext(BillContext);
@@ -42,6 +44,23 @@ export default function Billresult(props) {
       products: [],
       billnumber: ""
     });
+
+    //usestate for viewing bills in the offcanvas
+    const [billstore, setStore] = useState();
+    
+    const handlebillopen = () => 
+    {
+      setShowDetails(true);
+    }
+    const handlebillclose = () => 
+    {
+      setShowDetails(false);
+      setStore();
+    }
+
+    //usestate to show bills on offcanvas
+    const [showdetails, setShowDetails] = useState(false);
+    
     
     //State to hide or show modal
     const [show, setShow] = useState(false);
@@ -223,22 +242,39 @@ export default function Billresult(props) {
             {/* <h5>{bills.length === 0 && "No Bills Matching  Search Criteria"}</h5>
             <br/> */}
         </div>
-        <div className="row my-3">
+        <div className="my-3">
+          <ul className="list-group">
           {bills.length===0?(<h5>No Bills Matching  Search Criteria</h5>):searchresults.map((bill) => {
+            let date= bill.time;
+            const Date = date.split("T")?.[0];
+            const GetDate = moment(Date).format("DD-MM-YYYY");
+
             return (
-              <Billitem 
-              removebill={removebill} 
-              updateBill={updateBill} bill={bill} key={bill._id} showAlert={props.showAlert} />
+              <li className="list-group-item d-flex justify-content-between row-sm-8">
+              <span className="col-sm-1">{bill.billnumber}</span>
+              <span className="col-sm-1">{customers.map((customer)=>{return ((customer._id===bill.customer)?(customer.name):null)})}</span>
+              <span className="col-sm-1">{GetDate}</span>
+              <span className="col-sm-1">{bill.total}</span>
+              {/* <Billitem  updateBill={updateBill} bill={bill} key={bill._id} showAlert={props.showAlert} /> */}
+              <i className="fa fa-eye" onClick={()=>{setStore(bill); handlebillopen()}}></i>
+            </li>
+             
+              // <Billitem removebill={removebill} updateBill={updateBill} bill={bill} key={bill._id} showAlert={props.showAlert} />
             );
           })}
-          {/* {searchresults.map((bill) => {
-            return (
-              <Billitem 
-              removebill={removebill} 
-              updateBill={updateBill} bill={bill} key={bill._id} showAlert={props.showAlert} />
-            );
-          })} */}
+          </ul>
         </div>
+
+        {(billstore!==undefined)?(
+        <Offcanvas show={showdetails} onHide={handlebillclose} backdrop="static" placement="end" style={{width:"39rem"}}>
+          <Offcanvas.Header closeButton>
+            <Offcanvas.Title><strong>Billnumber</strong>: {billstore.billnumber}</Offcanvas.Title>
+          </Offcanvas.Header>
+          <Offcanvas.Body>
+            <Billitem removebill={removebill} updateBill={updateBill} bill={billstore} key={billstore._id} showAlert={props.showAlert} />
+          </Offcanvas.Body>
+        </Offcanvas>
+        ):null}  
         {/* <Button variant="outline-light" onClick={handleShow} ref={ref}>
         </Button> */}
 

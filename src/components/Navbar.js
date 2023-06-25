@@ -29,9 +29,9 @@ const Navbar = () => {
                         <li className="nav-item">
                             <Link className={`nav-link ${location.pathname==="/billhistory"? "active": ""}`} to="/billhistory">Bills History</Link>
                         </li>
-                        <li className="nav-item">
+                        {/* <li className="nav-item">
                             <Link className={`nav-link ${location.pathname==="/billdisplay"? "active": ""}`} onClick={()=>window.reload()} to="/billdisplay">Bills Search</Link>
-                        </li>
+                        </li> */}
                         <li className="nav-item">
                             <Link className={`nav-link ${location.pathname==="/customer"? "active": ""}`} to="/customer">Customers</Link>
                         </li>

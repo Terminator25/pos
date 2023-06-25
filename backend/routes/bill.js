@@ -16,6 +16,16 @@ router.get("/view", async (req, res) => {
   }
 });
 
+router.get("/viewdeleted", async(req, res)=>{
+  try {
+    const products = await Bill.find({deleted:true})
+    res.json(products); 
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send("Internal Server Error")
+  }
+})
+
 // ROUTE2: add bills from : POST "/api/bill/add"
 
 router.post("/add", async (req, res) => {
@@ -260,6 +270,24 @@ router.put("/delete/:id", async (req, res)=>{
       return res.status(400).json({error : "Wrong ID"});
     }
     let found = await Bill.findByIdAndUpdate(req.params.id, {$set: {deleted:true}},{new:true});
+    res.json({found});
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send("Internal Server Error");
+  }
+})
+
+router.put("/restore/:id", async (req, res)=>{
+  try{
+    try{
+      let found = await Bill.findById(ObjectId(req.params.id));
+      if(!found){
+        return req.status(404).send("Not Found");
+      }
+    } catch(error){
+      return res.status(400).json({error : "Wrong ID"});
+    }
+    let found = await Bill.findByIdAndUpdate(req.params.id, {$set: {deleted:false}},{new:true});
     res.json({found});
   } catch (error) {
     console.error(error.message);

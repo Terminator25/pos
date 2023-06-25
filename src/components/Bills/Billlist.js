@@ -5,15 +5,44 @@
   import Modal from "react-bootstrap/Modal";
   import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
   import Tooltip from 'react-bootstrap/Tooltip';  
+  import { Offcanvas } from "react-bootstrap";
+  import moment from "moment";
+
 
   export default function Billlist(props) {
     const context = useContext(BillContext);
-    const { bills, getBills, productlist, getProducts, editBill, getCustomers, customers } = context;
+    const { bills, getBills, productlist, getProducts, editBill, getCustomers, customers, getDeletedBills, restoreBill, deletedbills } = context;
 
     //Initial values stored in item state
     let initialitem = { pname: "", price: "", quantity: 1, gstrate:"" };
 
     const [item, setItem] = useState(initialitem);
+
+    //usestate to show bills on offcanvas
+    const [showdetails, setShowDetails] = useState(false);
+
+    const [showdelete, setShowDeleted] = useState(false);
+
+    const handleCloseDelete = () => setShowDeleted(false);
+    const handleShowDelete = () => setShowDeleted(true);
+
+    const handleHistory = () => {
+      getDeletedBills();
+      handleShowDelete();
+      console.log(deletedbills, "Deleted products from frontend");
+    }
+
+    const [billstore, setStore] = useState();
+    
+    const handlebillopen = () => 
+    {
+      setShowDetails(true);
+    }
+    const handlebillclose = () => 
+    {
+      setShowDetails(false);
+      setStore();
+    }
     
     //State for creating a product array
     const [products, setProducts] = useState([]);
@@ -162,6 +191,7 @@
       getProducts();
       getBills();
       getCustomers();
+      getDeletedBills();
       //eslint-disable-next-line
     }, []);
 
@@ -208,17 +238,65 @@
           {bills.length === 0 && "No Bills created"}
         </div>
         <div className="row my-2">
-          <h2>Transactions</h2>
+          
+          <button onClick={handleHistory} className="btn btn-primary col-sm-2 my-3">Get Deleted Items</button>
           <br />
+          <table>
+            <th style={{paddingInline:"1rem", width:"20rem"}}>Bill Number</th>
+            <th style={{width:"19rem"}}>Customer Name</th>
+            <th style={{paddingInline:"1rem", width:"20rem"}}>Date of Creation</th>
+            <th style={{paddingInline:"1rem"}}>Bill Total</th>
+          </table>
+          <ul className="list-group">
           {bills.slice(0).reverse().map((bill) => {
+            let date= bill.time;
+            const Date = date.split("T")?.[0];
+            const GetDate = moment(Date).format("DD-MM-YYYY");
+
             return (
             //  <> {bill.deleted===false?(<Billitem  updateBill={updateBill} bill={bill} key={bill._id} showAlert={props.showAlert} />):null}</>
-             <Billitem  updateBill={updateBill} bill={bill} key={bill._id} showAlert={props.showAlert} />
+             <li className="list-group-item d-flex justify-content-between row-sm-8">
+              <span className="col-sm-1">{bill.billnumber}</span>
+              <span className="col-sm-1">{customers.map((customer)=>{return ((customer._id===bill.customer)?(customer.name):null)})}</span>
+              <span className="col-sm-1">{GetDate}</span>
+              <span className="col-sm-1">{bill.total}</span>
+              {/* <Billitem  updateBill={updateBill} bill={bill} key={bill._id} showAlert={props.showAlert} /> */}
+              <i className="fa fa-eye" onClick={()=>{setStore(bill); handlebillopen()}}></i>
+            </li>
             );
           })}
+          </ul>
         </div>
         {/* <Button variant="outline-light" onClick={handleShow} ref={ref}>
         </Button> */}
+
+        {(billstore!==undefined)?(
+        <Offcanvas show={showdetails} onHide={handlebillclose} backdrop="static" placement="end" style={{width:"39rem"}}>
+          <Offcanvas.Header closeButton>
+            <Offcanvas.Title><strong>Billnumber</strong>: {billstore.billnumber}</Offcanvas.Title>
+          </Offcanvas.Header>
+          <Offcanvas.Body>
+            <Billitem  updateBill={updateBill} bill={billstore} key={billstore._id} showAlert={props.showAlert} />
+          </Offcanvas.Body>
+        </Offcanvas>
+        ):null}        
+
+        <Modal show={showdelete} onHide={handleCloseDelete}>
+        <Modal.Header closeButton>
+          <Modal.Title>Deleted Items</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <td>Billnumber</td>
+          <ul className="list-group">
+        {deletedbills.map(element=>{return(<li className="list-group-item mx-1 d-flex justify-content-between">{element.billnumber}<i className="fa fa-refresh" onClick={()=>{restoreBill(element._id)}} aria-hidden="true" ></i></li>)})}
+        </ul>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="primary" onClick={handleCloseDelete}>
+            Close
+          </Button>
+        </Modal.Footer>
+        </Modal>
 
         <Modal show={show} onHide={handleClose}>
           <Modal.Header closeButton>

@@ -7,6 +7,8 @@ const BillState = (props)=>{
   const billsInitial = []
   
   const [bills, setBills] = useState(billsInitial)
+
+  const [deletedbills, setDeleted] = useState([])
   
   const productsinitial = [];
   
@@ -33,6 +35,20 @@ const BillState = (props)=>{
     
         setBills(json)
       }
+
+      const getDeletedBills = async ()=>{
+
+        const response = await fetch(`${host}/api/bill/viewdeleted`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'auth-token': localStorage.getItem('token')
+          }
+        });
+        const json = await response.json();
+        setDeleted(json)
+      }
+    
     
       //Add a bill to database
       const addBill = async (total, paymentmode, billnumber, customer, discount, amount, gstamount, products)=>{
@@ -197,9 +213,30 @@ const BillState = (props)=>{
         setCustomers(customers.concat(json))
       }
 
+      const restoreBill = (id) => {
+        const option = {
+          method: 'PUT', headers: {
+            'Content-Type': 'application/json',
+            'auth-token': localStorage.getItem('token')
+          },
+          url: `${host}/api/bill/restore/${id}`
+        };
+        axios(option)
+        .then((e) => {
+          console.log(e,'e112');
+          if (e?.data?.found?._id) {
+            getBills();
+            getDeletedBills();
+          }
+        })
+        .catch((err) => {
+          console.log(err,'err');
+        })
+      }
+
 
     return (
-        <BillContext.Provider value={{result, bills, productlist, customers, setBills, getBills, addBill, getProducts, getCustomers, addCustomer, findBills, editBill, deleteBill}}>
+        <BillContext.Provider value={{result, bills, deletedbills, productlist, customers, setBills, getBills, getDeletedBills, restoreBill, addBill, getProducts, getCustomers, addCustomer, findBills, editBill, deleteBill}}>
             {props.children}
         </BillContext.Provider>
     )

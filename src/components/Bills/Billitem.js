@@ -8,7 +8,7 @@ export default function Billitem(props) {
 
   const { bill, updateBill, removebill} = props;
 
-  const {deleteBill, getCustomers, customers } = context;
+  const {deleteBill, getCustomers, customers} = context;
   // let initialcust = { name: "", gst: "", address: "", phno: "", email: "", state:"", pin:"", entity:""};
 
   const [products, setProducts] = useState([]);
@@ -57,7 +57,7 @@ export default function Billitem(props) {
   }
 
   return (
-    <div className="container col-sm-6">
+    <div className="container">
       <div
         className="card my-3"
         style={{ width: "35rem" }}

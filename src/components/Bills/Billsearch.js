@@ -89,9 +89,7 @@ export default function Billsearch(props) {
     }
     
     return(
-        <>
-        <div className="container">
-        <h2>Search Query</h2>
+        <div className="container my-3 bg-dark-subtle">
 
 
         <form>
@@ -100,13 +98,17 @@ export default function Billsearch(props) {
                     <label>Name</label>
                     <input
                     type="text"
-                    className="form-control"
+                    className="form-select"
                     name="name"
                     onChange={onChangeCustomer}
                     value={customer}
+                    list="customersnames"
                     placeholder="Customer Name"
                     />
                 </div>
+                <datalist id="customersnames">
+                    {customers.map((customer)=>{return(<option key={customer._id}>{customer.name}</option>);})}
+                </datalist>
                 {/* <div className="col-sm-3">
                     <label>Phone Number</label>
                     <input
@@ -122,7 +124,7 @@ export default function Billsearch(props) {
                     <label>Date of Bill</label>
                     <br/>
                     <form action="submit">
-                        <button className="bg-white rounded text-black my-1" onClick={onClickDate}>Open Calendar</button>
+                        <button className="bg-white rounded text-black my-1" onClick={onClickDate}>Toggle Calendar</button>
                         {selectDate ?(<DateRange
                             editableDateInputs={true}
                             onChange={setRange}
@@ -154,15 +156,15 @@ export default function Billsearch(props) {
                     />
                 </div>
                 <div className="col-sm-2 my-4">
-                    <button id='search' className="bg-primary rounded text-white my-1" type="submit" onClick={onClick}>Submit</button>
+                    <button id='search' className="bg-primary rounded text-white my-1" type="submit" onClick={onClick}>Search</button>
+                    {initialized===0 ? (null):(<button id="clear" className="bg-danger rounded text-white mx-2 my-1" onClick={()=>{setIni(0);}}>Clear Search</button>)}
                 </div>
             </div>
         </form>
         
         <div className="row">
-            {initialized===0 ? (<h4>Search results will appear here...</h4>):(<Billresult bills={result} showAlert={props.showAlert} />) }
+            {initialized===0 ? (null):(<Billresult bills={result} showAlert={props.showAlert} />) }
         </div>
         </div>
-        </>
     )
 }

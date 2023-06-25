@@ -5,6 +5,7 @@ import BillContext from "../../context/bills/BillContext";
 import PaymentContext from "../../context/payment/PaymentContext";
 import CategoryContext from "../../context/categories/CategoryContext";
 import { Card, Row, Col } from "react-bootstrap";
+import { DateTime } from "luxon";
 
 // import Billlist from "./Billlist"
 import { v1 as uuidv1 } from "uuid";
@@ -58,11 +59,16 @@ export default function Addbill(props) {
 
   // let uuid = BigInt(uuidv1().substring(0, 8));
 
+  const billnumbergenerator = () => {
+    const date= DateTime.now().toFormat('yyMMddHHmmss')
+    return date;
+  }
+
   const [bill, setBill] = useState({
     total: "",
     paymentmode: "Cash",
     // billnumber: uuidv1().substring(0, 8),
-    billnumber: uuidv1().substring(0, 8),
+    billnumber: billnumbergenerator(),
     // customer: {},
     customer: null,
     discount: 0,
@@ -363,7 +369,7 @@ export default function Addbill(props) {
       setBill({
         total: "",
         paymentmode: "Cash",
-        billnumber: uuidv1().substring(0, 8),
+        billnumber: billnumbergenerator(),
         // customer: setCustomer(initialcust),
         customer: "",
         discount: 0,

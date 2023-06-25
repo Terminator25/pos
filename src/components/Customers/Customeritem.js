@@ -61,7 +61,7 @@ export default function Customeritem(props) {
     const onClick = (e)=>{
       // let path=`/billdisplay`
       // navigate(path);
-      navigate('/billdisplay', {state: customer.name})
+      navigate('/billhistory', {state: customer.name})
       // findBills(customer.phno);      
     }
 

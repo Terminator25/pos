@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import ProductContext from "../../context/products/ProductContext";
 import Productitem from "./Productitem";
-// import ListProductItem from "./Listproductitem";
 import ReactPaginate from "react-paginate";
 import { Modal, Button } from "react-bootstrap";
 
